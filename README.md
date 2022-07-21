@@ -256,7 +256,15 @@ $ docker push <dockerId>/<repositoryName>:<imageTag>
 
 
 ### Login & Logout Docker Hub
+To login:
+```
+$ docker login
+```
 
+To logout:
+```
+$ docker logout
+```
 
 
 ### Pulling And Using Shared Images
