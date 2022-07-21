@@ -245,7 +245,7 @@ $ docker tag <existingImageName>:<existingImageTag> <newImageName>:<newImageTag>
 ```
 
 ## Docker Hub
-- Create a `Docker Hub` account
+- Create a [Docker Hub](https://hub.docker.com/) account
 - Open a repository
 - After creating the repository, it will create you a push command **with the repository name**
 - Your image name should be the **same as repository**
