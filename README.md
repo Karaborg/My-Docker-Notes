@@ -274,3 +274,61 @@ $ docker pull <imageName>:<imageTag>
 ```
 
 You do not have to pull the image to run. Docker will search on docker hub if docker can not find in on local. So you could just enter run command without event pulling the image (for only public images).
+
+
+## INTRUDUCING VOLUMES
+Let's say your web application creates a file and you want to save this file for later. Usually when you shutdown the container, all the data will be lost. To prevent that, we can use `VOLUME` command with a path in where the file is located.
+
+dokerfile with a volume example:
+```
+FROM node
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install
+
+COPY . /app
+
+EXPOSE 3000
+
+VOLUME ["/app/feedback"]
+
+CMD ["npm", "start"]
+```
+
+After specifying the `VOLUME`, the file will not be lost after you stop the container, **unless you delete the container**. Docker will save the file on our local but does not let you access. But, **docker will give volume a unique name each time you run the container** and that causes us to not use it like we want to use.
+
+Therefore, there are 2 types of volumes: **anonymous volumes** and **named volumes**.
+
+> Anonymous volumes are closely attached to the container but, named volumes are not.
+
+To create named volume, we will specify it on our `docker run ...` command with a `-v` tag. **We cannot create named volumes on our docker file**.
+```
+$ docker run -p <exposedPortForLocal>:<exposedPortYouMentionedOnDockerFile> -d --rm --name <containerName> -v <volumeName>:/<folderPath> <imageName>:<imageTag>
+```
+
+Example:
+```
+$ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback feedback-node:volumes
+```
+
+The example above, we can create a volume named `feedback`, which saves the **feedback** folder located under `/app`. Keep in mind that, `/app` is our root directory in the container, we specified this on our docker file.
+
+After running our container with given command we mentioned in the example above, and then stop the container, which is removes the container because of the `--rm` tag, we still be able to have our volume. And if we run a new container with the same volume name and path, we will be able to access this volume file.
+
+To list volumes:
+```
+$ docker volume ls
+```
+
+To delete a volume:
+```
+$ docker volume rm <volumeName>
+```
+
+To delete all volumes:
+```
+$ docker volume prune
+```
