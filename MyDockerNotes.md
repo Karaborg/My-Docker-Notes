@@ -1,5 +1,3 @@
-# My Docker Notes
-
 ## Setup
 First thing first, install docker extention to your IDE. It is **not a must** but, will help. To get started with docker, just open a new file and name it `Dockerfile`.
 
