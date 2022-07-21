@@ -7,7 +7,7 @@ First thing first, install docker extention to your IDE. It is **not a must** bu
 ## Getting Started
 Imagine you want to run a **node js** web application with docker. As you many know, the first thing you need to do before starting the application is, getting the project root folder and installing the configurations and packages, which you do with `npm install` command and then you can start the app with `npm start`. So just like that, we will be including all these steps inside of our docker file.
 
-> Example:
+Example:
 ```
 FROM node:16
 
