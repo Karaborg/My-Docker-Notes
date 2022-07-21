@@ -276,7 +276,7 @@ $ docker pull <imageName>:<imageTag>
 You do not have to pull the image to run. Docker will search on docker hub if docker can not find in on local. So you could just enter run command without event pulling the image (for only public images).
 
 
-## INTRUDUCING VOLUMES
+## Introducing Volumes
 Let's say your web application creates a file and you want to save this file for later. Usually when you shutdown the container, all the data will be lost. To prevent that, we can use `VOLUME` command with a path in where the file is located.
 
 dokerfile with a volume example:
