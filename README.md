@@ -337,7 +337,7 @@ $ docker volume prune
 ## Bing Mounts
 Let's say you have a web application to run with a docker. Since we **cannot change the container**, we also cannot edit our web application on docker. At least without building a new image and then running a container based on that image. Therefore, **bind mounts helps us make changes on out application inside our running container**.
 
-> For windows user; we first need to ... -- will be updated later -- 
+> For windows user; we first need to follow the instructions [here](https://devblogs.microsoft.com/commandline/access-linux-filesystems-in-windows-and-wsl-2/)
 
 Before we begin, make sure docker can access your application located on your host machine. If you are using `windows` operating systems, you do not have anything to worry about, it is already handled. But, if you are using `macOS`, simply open the **settings** on your docker application, click on **resources** and define your project path as accessible under **file sharing**.
 
@@ -376,6 +376,32 @@ $ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback 
 ```
 
 With the command above; we are running a container which will be accessable from port `3000`; will be on deattached mode with a `-d` tag; will remove the container once the container stops with the `--rm` tag; will name the container as **feedback-app** with a `--name` tag; will save the folder which located under `/app/feedback` on our container to our host machine with a `-v` tag; will allow us to edit the application with a `-v` tag again; will prevent us to overwrite `node_modules` folder with a `-v` tag again; and this container will be based on **feedback-node** image which has a **volumes** tag.
+
+So we ran our web application with volumes and bind mounts. Is it enough? No. As you may know, if you worked with node project, even if you can see the front-end changes, you still will not be able to see your back-end changes. This is a common issue with node projects. And there is also a solution for it. It is called `nodemon`. Nodemon will re-start your web application when you refresh the page and it helps us to get the back-end changes too.
+
+To do so; we will add a new dependency on our application:
+1. Open package.json file
+2. Add the whole `devDependencies` part as shown below
+3. Also add `scripts` part as shown below
+4. Make sure you have `CMD ["npm", "start"]`, instead of `CMD ["npm", "server.js"]` on your docker file.
+```
+{
+  "name": "data-volume-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.19"
+  }
+}
+```
 
 ### Volumes & Bind Mounts Differences
 
