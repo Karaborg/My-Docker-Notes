@@ -383,14 +383,29 @@ With the command above; we are running a container which will be accessable from
 ```
 $ docker run -v /app/data ...
 ```
+> Created specifially for a singe container.
+> Survives when container stops unless we delete the container.
+> Can not be shared across containers.
+> Since it's anonymous, it cannot be re-used.
+> Helpfull for preventing overwriting.
 
-**Named Volume**, which let the container save `data` folder and can be used again if we give the exact volume:
+
+**Named Volume**, which let the container save `data` folder and can be used again:
 ```
 $ docker run -v data:/app/data ...
 ```
+> Created in general, not tied to any container.
+> Survives when container stops, even after we delete the container.
+> Can be shared across containers.
+> Can be re-used for same containers.
+
 
 **Bind Mount**, which let the docker update the container when we make changes on our host:
 ```
 $ docker run -v /path/to/code:/app/code ...
 ```
+> Location on host file system, not tied to any container.
+> Survives when container stops, even after we delete the container.
+> Can be shared across containers.
+> Can be re-used for same containers.
 
