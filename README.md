@@ -379,17 +379,17 @@ With the command above; we are running a container which will be accessable from
 
 ### Volumes & Bind Mounts Differences
 
-Anonymous Volume, which let the container save `data` folder:
+**Anonymous Volume**, which let the container save `data` folder:
 ```
 $ docker run -v /app/data ...
 ```
 
-Named Volume, which let the container save `data` folder and can be used again if we give the exact volume:
+**Named Volume**, which let the container save `data` folder and can be used again if we give the exact volume:
 ```
 $ docker run -v data:/app/data ...
 ```
 
-Bind Mount, which let the docker update the container when we make changes on our host:
+**Bind Mount**, which let the docker update the container when we make changes on our host:
 ```
 $ docker run -v /path/to/code:/app/code ...
 ```
