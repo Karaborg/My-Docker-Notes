@@ -377,5 +377,20 @@ $ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback 
 
 With the command above; we are running a container which will be accessable from port `3000`; will be on deattached mode with a `-d` tag; will remove the container once the container stops with the `--rm` tag; will name the container as **feedback-app** with a `--name` tag; will save the folder which located under `/app/feedback` on our container to our host machine with a `-v` tag; will allow us to edit the application with a `-v` tag again; will prevent us to overwrite `node_modules` folder with a `-v` tag again; and this container will be based on **feedback-node** image which has a **volumes** tag.
 
+### Volumes & Bind Mounts Differences
 
+Anonymous Volume, which let the container save `data` folder:
+```
+$ docker run -v /app/data ...
+```
+
+Named Volume, which let the container save `data` folder and can be used again if we give the exact volume:
+```
+$ docker run -v data:/app/data ...
+```
+
+Bind Mount, which let the docker update the container when we make changes on our host:
+```
+$ docker run -v /path/to/code:/app/code ...
+```
 
