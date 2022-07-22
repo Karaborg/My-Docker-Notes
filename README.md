@@ -435,3 +435,21 @@ $ docker run -v /path/to/code:/app/code ...
 > Can be shared across containers.
 > Can be re-used for same containers.
 
+## Read-Only Volumes
+So we now have a proper bind mount. The idea of the bind mount is that we want to make changes while the container is running. So we have **read** and **write** permit for our container. But, the container also has read and work permit for our app inside of the container. We do not want that. What we want is, we should be the only one making code changes. So we will give the bind mount a **read-only** permit.
+> Container can't affect the project which is located in our host, it can only affect the project inside of that container.
+
+Before we get into that; we could also let our container to write for some folders. So we will give a read-only permit for the application but, we will **exclude some folders** so we can use the data inside of those folders later.
+
+To do so, we will just add `:ro` at the end of our bind mount and to exlude folders, we will just use `anonymous volumes`:
+```
+$ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> -d --rm --name <containerName> -v <volumeName>:/<filePath> -v $(pwd):/<workdir>:ro -v /<workdir>/node_modules/ <imageName>:<imageTag>
+```
+
+Example:
+```
+$ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app:ro -v /app/temp -v /app/node-modules/ feedback-node:volumes
+```
+So with the example above; we gave the bind mount a read-only permit. And we also let the container write for both `/app/feedback` and `/app/temp` paths.
+
+
