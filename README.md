@@ -335,7 +335,7 @@ $ docker volume prune
 ```
 
 
-## Bing Mounts
+## Bind Mounts
 Let's say you have a web application to run with a docker. Since we **cannot change the container**, we also cannot edit our web application on docker. At least without building a new image and then running a container based on that image. Therefore, **bind mounts helps us make changes on out application inside our running container**.
 
 > For windows user; we first need to follow the instructions [here](https://devblogs.microsoft.com/commandline/access-linux-filesystems-in-windows-and-wsl-2/)
