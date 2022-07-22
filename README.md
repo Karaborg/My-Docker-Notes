@@ -332,3 +332,50 @@ To delete all volumes:
 ```
 $ docker volume prune
 ```
+
+
+## Bing Mounts
+Let's say you have a web application to run with a docker. Since we **cannot change the container**, we also cannot edit our web application on docker. At least without building a new image and then running a container based on that image. Therefore, **bind mounts helps us make changes on out application inside our running container**.
+
+> For windows user; we first need to ...
+
+Before we begin, make sure docker can access your application located on your host machine. If you are using `windows` operating systems, you do not have anything to worry about, it is already handled. But, if you are using `macOS`, simply open the **settings** on your docker application, click on **resources** and define your project path as accessible under **file sharing**.
+
+Moreover, we **cannot define bind mounts in our docker file**. So, just like we did with the volumes, we need to define bind mounts in our run command.
+
+To define bind mounts, we will be using `-v` tags just like we used for **volume**:
+```
+$ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> -d --rm --name <containerName> -v <volumeName>:/<filePath> -v "<absoluteFileOrFolderPathOnYourHostMachine>:/<workdirPath>" <imamgeName>:<imageTag>
+```
+
+Example:
+```
+$ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback -v "C:\Users\<userName>\Documents\GitHub\data-volumes-01-starting-setup\:/app" feedback-node:volumes
+```
+
+Since the absolute paths are long; we can just use `"&cd&"` for **windows**:
+```
+$ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback -v "%cd%":/app feedback-node:volumes
+```
+
+And `$(pwd)` for **Linux** / **macOS**:
+```
+$ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app feedback-node:volumes
+```
+
+**There is a problem with this command though**. Imagine we are running a web application again. We already mentioned that we need to install all the dependencies, such as `node_modules` folder. And to do that we also typed `RUN npm install` inside of our docker file. But since we run the container with the command above, we overwrite the application files all over with the bind mount. And that means we lost our dependencies, which will crash our application.
+
+To prevent this problem, we will need to use another volume with a `-v` tag. We can also do this by typing `VOLUME [ "/app/node_modules" ]` but, that would mean we need to re-build our image. And if you have not already noticed, we will be using anonymous volume.
+```
+$ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> -d --rm --name <containerName> -v <volumeName>:/<filePath> -v $(pwd):/<workdir> -v /<workdir>/node_modules/ <imageName>:<imageTag>
+```
+
+Example:
+```
+$ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app -v /app/node-modules/ feedback-node:volumes
+```
+
+With the command above; we are running a container which will be accessable from port `3000`; will be on deattached mode with a `-d` tag; will remove the container once the container stops with the `--rm` tag; will name the container as **feedback-app** with a `--name` tag; will save the folder which located under `/app/feedback` on our container to our host machine with a `-v` tag; will allow us to edit the application with a `-v` tag again; will prevent us to overwrite `node_modules` folder with a `-v` tag again; and this container will be based on **feedback-node** image which has a **volumes** tag.
+
+
+
