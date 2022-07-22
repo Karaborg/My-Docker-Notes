@@ -1,4 +1,5 @@
-# My Docker Notes
+# Welcome
+This is me taking notes on github while learning `Docker`. I will probably going to need this document when I forget how docker works. If you find someting usefull, be my guest. I will try to update this whenever I study.
 
 ## Setup
 First thing first, install docker extention to your IDE. It is **not a must** but, will help. To get started with docker, just open a new file and name it `Dockerfile`.
