@@ -337,7 +337,7 @@ $ docker volume prune
 ## Bing Mounts
 Let's say you have a web application to run with a docker. Since we **cannot change the container**, we also cannot edit our web application on docker. At least without building a new image and then running a container based on that image. Therefore, **bind mounts helps us make changes on out application inside our running container**.
 
-> For windows user; we first need to ...
+> For windows user; we first need to ... -- will be updated later -- 
 
 Before we begin, make sure docker can access your application located on your host machine. If you are using `windows` operating systems, you do not have anything to worry about, it is already handled. But, if you are using `macOS`, simply open the **settings** on your docker application, click on **resources** and define your project path as accessible under **file sharing**.
 
