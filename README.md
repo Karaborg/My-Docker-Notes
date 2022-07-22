@@ -452,4 +452,98 @@ $ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback 
 ```
 So with the example above; we gave the bind mount a read-only permit. And we also let the container write for both `/app/feedback` and `/app/temp` paths.
 
+> If we check the volume list with a `docker volume ls` command, we can see our all 3 volumes. 2 anonymous and 1 named. Keep in mind that, we cannot see our bind mount. It is not listed as **volume**.
+
+## Important Note
+We are ran our container with a **volumes** and **bind mount** so far. And we know we are loading our application to container with that **bind mount**. So why do we have still `COPY . ./app` on our docker file, can we delete it from our docker file?
+
+The answer is **yes**, but don't. Our application will run properly either way. But the thing is, we should not start our container with a bint mount if we are working on production. Because we might not be able to give a absolute path for the production. So we want to start our container with a snapshot (with `COPY` command).
+
+## Important Note
+We mentioned about `COPY . ./app` command before. Which means we copy all the files inside of the image. But, what if we do not want that. Our application might contain sensitive data and copying that data might be a serious mistake. Or we could just ignore some files, such as `node_modules`.
+
+To ignore files/folders for docker, we simply create `.dockerignore` file on our root directory like we created our dockerfile. The usage of this file is same is `.gitignore`.
+> While creating `.dockerignore`, do not forget about the dot at the beggining of the name.
+
+# Arguments & Environment Variables
+
+## Environment Variables & .env Files
+To specify a environment variable, we will be using `ENV` command. Let's say we want our port as a environment variable. First thing first, we will add like `ENV <name> <value>`. So, our docker file should look like this:
+```
+FROM node
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install
+
+COPY . /app
+
+ENV PORT 3000
+
+EXPOSE $PORT
+
+CMD ["npm", "start"]
+```
+In the example above, we can see we specified our port as `ENV PORT 3000`. And we also used that variable ın our docker file like `EXPOSE $PORT`.
+
+But that's not enough. In our main class, we still have it as hard-coded. So we will replace that as `process.env.PORT`, like the example below:
+```
+app.listen(process.env.PORT);
+```
+
+We can also clerify variables in our run command. If we want to over-write our port from **3000** to **8000**, we can use `--env` or `-e` tags.
+
+Example:
+```
+$  docker run -p 3000:8000 --env PORT=8000 -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app/ro -v /app/node_modules -v /app/temp feedback-node:env
+```
+So we clerified our PORT variable as **8000**. Just do not forget that, after changing the port, we also need to change our exposed port source.
+
+We can also give variables from a file. For such things, we create a file on our root project directory named `.env`. We then, can clerify the port as shown below in `.env` file:
+```
+PORT=8000
+```
+
+After doing so, we can simple show our .env file in our run command with a `--env-file` tag like this:
+```
+$ docker run -p 3000:8000 --env-file ./.env -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app/ro -v /app/node_modules -v /app/temp feedback-node:env
+```
+
+## Important Note
+If your project has private keys, database urls etc. You might want to prefer using a separate environment variables file, like `.env` file. And make sure you added that file as ignored in your `.dockerignore` file. Otherwise anyone can see them with a simple `docker history <image>`.
+
+## Build Arguments (ARG)
+We already changed clerified our port as environment but, we can still make it better. We can set a default value and use that value for our environment value **and** we can also change that value with a build command.
+
+To do that, we will add `ARG` command like this:
+```
+FROM node
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install
+
+COPY . /app
+
+ARG DEFAULT_PORT=3000
+
+ENV PORT $DEFAULT_PORT
+
+EXPOSE $PORT
+
+CMD ["npm", "start"]
+```
+So we clefied our default port with a `ARG DEFAULT_PORT=3000` and we used that argument in our environment value as `ENV PORT $DEFAULT_PORT`.
+
+> We cannot use argument values in other classes, we can only use them in our docker file.
+
+After clarifying our argument, we can now change the default port however we want with a `--build-arg` tag in our build command like this:
+```
+$ docker build -t feedback-node:arg --build-arg DEFAULT_PORT=8000
+```
+This will over-write our port as 8000 and we can access our app through this port.
 
