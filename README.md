@@ -548,3 +548,73 @@ $ docker build -t feedback-node:arg --build-arg DEFAULT_PORT=8000
 ```
 This will over-write our port as 8000 and we can access our app through this port.
 
+
+# Containers & Network Requests
+Let's say your node application has API requests, like GET and POST requests. And maybe you have a local database and you want your dockerized application to communicate with this local application. It is also possible to dockerize a database and make them communicate each other. To do that, we will be focusing 3 different network requests:
+
+## Requests from container to network
+This is the case when you want to use API. To manage APIs, you do not have to do anything different. Containers can manage that as long as your application is working.
+
+Example:
+```
+mongodb://localhost:27017/swfavorites
+```
+
+## Requsts from container to your local
+In this case, let's say your application needs to communicate with your local database. Your application would run if you were running on your local but, when you dockerize your application, it will not work.
+
+To fix this, you simply need to change your connection url. We are assuming your database url is something like `mongodb://localhost:27017/swfavorites`. That will not work. Because docker will not recognize `local`. What docker recognize is: `host.docker.internal`. So all you have to do is to change your url as mentioned.
+
+> As summary: use `host.docker.internal` rather than `localhost` on your local connetion urls.
+
+Example:
+```
+mongodb://host.docker.internal:27017/swfavorites
+```
+
+## Request from container to other container
+So, in this case, let's say we want our mongodb database to run on a different container, and access that container from another container.
+
+And since we can run node on containers without even installing on our local, we can also run mongo on docker without installing it.
+
+To run mongo on container, we will simple run the command below:
+```
+$ docker run -d --name mongodb mongo
+```
+> The command above will look at our images if we have `mongo` image. And since we do not, it will pull the official image from docker itself. If you are not certain how to call images, you can google as `docker mongodb` etc.
+
+Just keep in mind that, if you run docker inside of a container, neither `localhost`, nor `host.docker.internal` will work. Because our mongodb is not in our local. So we need to set our containers IP address.
+
+To find our containers IP address, we will use `inspect`:
+```
+$ docker container inspect <coontainerName>
+```
+
+> Look for the tag called `IPAddress`, under `NetworkSettings`.
+
+After setting the IP as show above, you will be able to use your database and your application.
+
+But, this is hard-coded. There is a better way. So, we already managed to run the application just fine but, the IP we used for communicating between one container and other might change. So to prevent that issue and also to make our application more secure, we will be using **Docker Network**.
+
+Docker Network is simply puts the container in a specified network. You can add other containers into that network. With that, all the containers inside of that network, will be able to communicate.
+
+To do so; we first need to create a network. To do create a network, we will be using `--network` tag:
+```
+$ docker network create <networkName>
+```
+
+After creating the network, we will be changing the url of our connection inside of our application. The part in our application, the `localhost`, or `host.docker.internal` part will actually be our **container name which we want to communicate**. So if you build your mongo container named like `mongodb`, you need to set the url as `mongodb`.
+
+Example:
+```
+mongodb://mongodb:27017/swfavorites
+```
+
+But that's not all. We created the network but, we have not put the containers inside yet. To do that, we will be again, using `--network` tag on our run command, just like below:
+```
+$ docker run -p 3000:3000 -d --rm --name <containerName> --network <networkName> <imageName>
+```
+
+> Docker Network also support differet drivers. The default drive is `bridge` but, if you want to change that you can simple use `--driver` tag as: `docker network create --driver bridge my-net`.
+
+ 
