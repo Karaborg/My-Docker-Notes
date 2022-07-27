@@ -618,3 +618,92 @@ $ docker run -p 3000:3000 -d --rm --name <containerName> --network <networkName>
 > Docker Network also support differet drivers. The default drive is `bridge` but, if you want to change that you can simple use `--driver` tag as: `docker network create --driver bridge my-net`.
 
  
+# Building Multi-Container Application
+Let's say we want to run a web applicaiton. We want to run mongodb on a one container, back-end on an another container and, frontend on a different container. We also want to save a log file from backand application. And we also want to save the data from our mongodb. Plus, we also want our containers connected to each other.
+
+## Starting with network:
+```
+ $ docker network create <networkName>
+```
+
+## Then, mongodb:
+```
+$ docker run -d --rm --name mongodb --network <networkName> mongo
+```
+
+## Then, backend:
+> Before building the backend container, **make sure you are using `container name` which you started your mongo rather than using `localhost`**.
+> We also need to expose a port with `-p` tag for react to connect our backend application. We will be discuss this in the frontend part, right below.
+Dockerfile example:
+```
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 80
+
+CMD ["npm", "start"]
+```
+
+```
+$ cd backend
+$ docker build -t <imageNameforBackend> .
+$ docker run -d --rm --name <containerNameforBackend> -p 80:80 --network <networkName> <imageNameforBackend>
+$ cd ..
+```
+
+## And then, frontend:
+> We are using `react` for frontend. That means the javascript code will run on the browser, not in the container. And that means, changing `localhost` to `container name` **will not work**. So, instead of using container name, we will use something the browser can understand. Which is `localhost`.
+Dockerfile example:
+```
+FROM node
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+> Keep in mind that, when running a container with `react`, you should use `-it` tags. We are not going to interact with it on console or monitore it but, this is how react works.
+
+> Since react does not run on docker, it runs on browser, there is also no use of adding `--network` tag on the run command. Because it won't matter anyway. Therefore, to connect react to our backend application, we already exposed a port. That is because react cannot run in container, and we couldn't put it into any network. So we need to make sure react can reach the backend with localhost ip with a exposed port.
+```
+$ cd frontend
+$ docker build -t <imageNameforFrontend> .
+$ docker run -d --rm --name <containerNameforFrontend> -it <imageNameforFrontend>
+$ cd ..
+```
+ 
+So right now, we successfully managed to start our application and it is working. But, that is not all. We can add data on our database, but when we stop our mongo container, our all stored data will be lost. So we need to save our data with a `named volume`. We are not using **anonymous volume** because it will be impossible to re-use it after re-starting the container. And, we cannot use **bind mount** because we do not have the absolute path. So, **named volume** will just save our data on our host, and when we re-start our container, it will re-load our data, and if there are not data, it will create one.
+
+> To use `named volume`, we need a path where mongo saves data. And to find where it is, we can look up to [docker mongo](https://hub.docker.com/_/mongo) page.
+
+So, we will run our mongo container as this:
+```
+$ docker run -d --rm --name mongodb -v data:/data/db --network <networkName> mongo
+```
+
+## Securing database access
+We make sure our data will not get lost and removed even after we delete our database container. But, we also need to secure our database access. To do that, we will be using `-e` tags to give a **username** and a **password** on our run command like this:
+```
+$ docker run -d --rm --name mongodb -v data:/data/db --network <networkName> -e MONGO_INITDB_ROOT_USERNAME=<username> -e MONGO_INITDB_ROOT_PASSWORD=<password> mongo
+```
+> The tags we used as `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD` are again in the [docker mongo](https://hub.docker.com/_/mongo) page.
+
+If we run our container just like this, event our application cannot be able to access our database. So, we need to modify our db url too.
+Our database url was, let's say `mongodb://mongodb:27017/course-goals`. Now we need to modify as `mongodb://<username>:<password>@mongodb:27017/course-goals?authSource=admin` as shown in [Mongodb Documentation](https://www.mongodb.com/docs/manual/reference/connection-string/) page.
+
+> **IMPORTANT NOTE:** If you get an `Authentication failed` error, just delete the volume we created before while running mongo.
