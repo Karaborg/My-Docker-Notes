@@ -864,6 +864,7 @@ services:
       - backend
 volumes:
   data:
+  logs:
 ```
 
 - So now, we told docker to look for a `Dockerfile` under `frontend` folder.
