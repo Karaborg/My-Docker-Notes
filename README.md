@@ -707,3 +707,228 @@ If we run our container just like this, event our application cannot be able to 
 Our database url was, let's say `mongodb://mongodb:27017/course-goals`. Now we need to modify as `mongodb://<username>:<password>@mongodb:27017/course-goals?authSource=admin` as shown in [Mongodb Documentation](https://www.mongodb.com/docs/manual/reference/connection-string/) page.
 
 > **IMPORTANT NOTE:** If you get an `Authentication failed` error, just delete the volume we created before while running mongo.
+
+# Docker Compose
+So far, we learned how to start containers and and build images with our dockerfile and we also learned how to add different options on our `build` and `run` commands. Like we did in the last practice, we used `-e`, `-v`, `--network` tags and so on. Since we had lots of things to add, these commands might get a bit long and it may increase to typo and fail. So, to make this easier and efficient, we will use **Docker Compose**. Which will help us **not to use long commands**. 
+
+> Docker compose **does not** replace `Dockerfiles`.
+
+> Docker compose **does not** replace `Images` or `Containers`.
+
+> Docker compose is **not suited** for multiple containers on different hosts/machines.
+
+## To Start
+> If you are using `Linux`, you should install docker compose separately by following the [Install Docker Compose](https://docs.docker.com/compose/install/) page.
+
+We will first create a `yaml`/`yml` file named `docker-compose` on our root directory. So at the end, we will have a `docker-compose.yaml` file.
+
+In this file, we will be using a different syntax. And this file has some required parameters. Such as, `version` and `services`. These parameters are special, you do not want to shorten or modify the name, it should be just as it is.
+
+It is also important to check your blanks. Imagine as a JSON file without brackets.
+
+> At this point, it would be very helpfull to add `Docker` extension on your IDE because, it will help you while writing.
+
+Example:
+```
+version: '3.8'
+services:
+  <containerName_1>:
+    image: 'mongo'
+    volumes:
+      - data:/data/db
+    environment:
+      #- MONGO_INITDB_ROOT_USERNAME=user
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    env_file:
+      - ./env/mongo.env
+    networks:
+      - goals-net
+  <containerName_2>:
+  <containerName_3>:
+volumes:
+  data:
+```
+
+- As you can see, we started with `version`, which defined as 3.8. And then `services`, which contains our `containers`. So, we can say **services** is actually **parent** of our **containers**.
+
+- We then defined images for our containers like `image: 'mongo'`.
+
+- Volumes are the same way we used in our commands
+
+- Environments are both acceptable for both example above. You can also use this as `env_file` as shown above. You just need to show the `env` file path which contains the variables such as `MONGO_INITDB_ROOT_USERNAME=username`.
+> `#` is used for comment lines.
+
+- Networks is just to clarify the network name.
+> Since docker composer will start all these containers together. We do not actually need to clearify a network because, they will be allowed to communicate. But there is nothing wrong with defining again.
+
+> If you noticed, we defined `volumes` also as upper title. That is because YAML want us to define **only** the `named volumes` again, just so we can use it in another containers too. **Anonymous volumes** and **bind mounts** are not included here.
+
+> Before running the compose, **clear** the `images`, `containers`, `volumes`. And start the compose from the root directory of your project file, which is also the same file your `docker-compose.yaml` located.
+
+So, after finishing with our docker compose file, we can start the compose with the command below. But, we also want this compose on deattach mode with the same `-d` tag. The stop command for compose is actually removes all the containers and images but, it does not removes `volumes`. To also remove those, we will also use `-v` tag.
+```
+$ docker-compose up -d -v
+```
+
+To stop docker compose:
+```
+# docker-compose down
+```
+
+## Working With Multiple Containers
+We learned how to start a docker compose which includes a container. Now it is time for adding 2 more container which are actually our node/backend and react/frontend containers we already talked about before.
+
+Example:
+```
+version: '3.8'
+services:
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - data:/data/db
+    env_file:
+      - ./env/mongo.env
+  backend:
+    build: ./backend
+    #build:
+    #  context: ./backend
+    #  dockerfile: Dockerfile
+    #  args:
+    #    some-arg: 1
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+  <containerName_3>:
+volumes:
+  data:
+```
+
+So as you can see, we are added `backend` container now. So, first thing first, we used shared image for our `mongodb`. But, we do not have any images for backend. 
+
+- To tell compose to build the image, we use `build` tag. The example abone we told compose that, for backend, compose will go to `backend` folder which is also located under root directory, and look for `Dockerfile` spesificly. 
+
+> `Build` tag has two types. Long and short. Short version is just a un-commented part on the example above and long version is commented. The difference is you can give spesifics with longer version.
+
+- Ports, is just as it is.
+
+- Volumes, we have 3 volumes here. At the top we can see the ``named volume` as we did before. The second one is `bind mount`. As you remember, in bind mounts, we need to use absolute paths but in our docker compose, we do not need that. So we just show the path we want to use. And lastly, we have a `anonymous volume` which is same as it is.
+
+- Depends On is, we tell compose this container is depending on the `mongodb` container. So, compose will know which one to build first.
+
+And now, we will add our `frontend` container.
+
+Example:
+```
+version: '3.8'
+services:
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - data:/data/db
+    env_file:
+      - ./env/mongo.env
+  backend:
+    build: ./backend
+    #build:
+    #  context: ./backend
+    #  dockerfile: Dockerfile
+    #  args:
+    #    some-arg: 1
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./fontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+volumes:
+  data:
+```
+
+- So now, we told docker to look for a `Dockerfile` under `frontend` folder.
+
+- The `ports` are as is.
+
+- We have a bind mount for the path `/app/src`
+
+- So as we discussed before, react is run as interactive. We were running this container with `-it` tags. So, to do same on our docker compose, we are using both `stdin_open` tag for telling, this container will be able to get inputs, and `tty` tag for telling this container will need a terminal.
+> We start the docker composer on deattach mode so we will not be seeing this terminal for the react, but the terminal will be there on browser.
+
+## Also
+We learned `docker-compose run` will build our images and run the containers. However, if the images already builded or are public images, compose will not build the images again. To forse compose **re-build** images every time we start, we can use `build`:
+```
+docker-compose build 
+```
+
+If you noticed, when we start our containers with docker compose, the compose will assign names to each container. The names will include our container names but, not the same name as we defined. To set the names as we want, we can add `container_name: <containerName>` to our `docker-compose.yaml` file under each container.
+
+## In conclusion
+So at the end, our whole `docker-compose.yaml` file will be looking like this:
+```
+version: "3.8"
+services:
+  mongodb:
+    image: 'mongo'
+    volumes: 
+      - data:/data/db
+    # environment: 
+    #   MONGO_INITDB_ROOT_USERNAME: max
+    #   MONGO_INITDB_ROOT_PASSWORD: secret
+      # - MONGO_INITDB_ROOT_USERNAME=max
+    env_file: 
+      - ./env/mongo.env
+    container_name: mongodb
+  backend:
+    build: ./backend
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     some-arg: 1
+    ports:
+      - '80:80'
+    volumes: 
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file: 
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+    container_name: backend
+  frontend:
+    build: ./frontend
+    ports: 
+      - '3000:3000'
+    volumes: 
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on: 
+      - backend
+    container_name: frontend
+volumes: 
+  data:
+  logs:
+```
