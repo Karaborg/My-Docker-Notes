@@ -933,3 +933,24 @@ volumes:
   data:
   logs:
 ```
+
+# VoltDB on Docker
+Let's run 3 node local `VoltDB` cluster:
+- Create a network so nodes can connect to each others.
+- Start each node one by one.
+- List exposed ports to our local.
+```
+$ docker network create -d bridge voltLocalCluster
+$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node1 --network=voltLocalCluster voltdb/voltdb-community:6.6
+$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node2 --network=voltLocalCluster voltdb/voltdb-community:6.6
+$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node3 --network=voltLocalCluster voltdb/voltdb-community:6.6
+$ docker port node1
+```
+
+> You can connect through browser with the url `http://localhost:<port>`. To see the correct port, you should use the exposed port for **Web Interface Port (httpd)**, which is `8080` by default. **NOT THE `8080` ITSELF BUT, THE EXPOSED PORT FOR `8080`**.
+
+> To connect with `sqlcmd`; open a terminal from the container, you can easily open a terminal from containers tab if you installed `Docker Desktop`. You can connect by using `sqlcmd --servers=<containerName>`, we used `node1`, `node2` and `node3`. Or `sqlcmd --port=<clientPort>`, the client port is `21212` by default.
+
+> For more info, check out [Docker Hub](https://hub.docker.com/r/voltdb/voltdb-community). And [this](https://vimeo.com/378332643) video might help too.
+
+To start a 1 node VoltDB, use the run command like this: `docker run -d -P -e HOST_COUNT=1 -e HOSTS=node1 --name=node1 --network=voltLocalCluster voltdb/voltdb-community:6.6`, and that is it.
