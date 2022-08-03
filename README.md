@@ -940,10 +940,10 @@ Let's run 3 node local `VoltDB` cluster:
 - Start each node one by one.
 - List exposed ports to our local.
 ```
-$ docker network create -d bridge voltLocalCluster
-$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node1 --network=voltLocalCluster voltdb/voltdb-community:6.6
-$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node2 --network=voltLocalCluster voltdb/voltdb-community:6.6
-$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node3 --network=voltLocalCluster voltdb/voltdb-community:6.6
+$ docker network create -d bridge <networkName>
+$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node1 --network=<networkName> voltdb/voltdb-community
+$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node2 --network=<networkName> voltdb/voltdb-community
+$ docker run -d -P -e HOST_COUNT=3 -e HOSTS=node1,node2,node3 --name=node3 --network=<networkName> voltdb/voltdb-community
 $ docker port node1
 ```
 
@@ -951,6 +951,96 @@ $ docker port node1
 
 > To connect with `sqlcmd`; open a terminal from the container, you can easily open a terminal from containers tab if you installed `Docker Desktop`. You can connect by using `sqlcmd --servers=<containerName>`, we used `node1`, `node2` and `node3`. Or `sqlcmd --port=<clientPort>`, the client port is `21212` by default.
 
+The main idea about which port to use is that, if you are connecting the voltdb from **outside** of the container, you should use the exposed ports for your local. And if you are connecting from **inside** of the container, you can simple use the default voltdb ports.
+
 > For more info, check out [Docker Hub](https://hub.docker.com/r/voltdb/voltdb-community). And [this](https://vimeo.com/378332643) video might help too.
 
 To start a 1 node VoltDB, use the run command like this: `docker run -d -P -e HOST_COUNT=1 -e HOSTS=node1 --name=node1 --network=voltLocalCluster voltdb/voltdb-community:6.6`, and that is it.
+
+# Utility Containers
+We already covered how we can set environments and run applications with docker. But we can also use docker just to set environmets, such as node.
+
+To give a simple example; if we run node with a `docker run -it -d node`, the node application will run and wait for the input. Therefore, while the node application waiting for input, we can run a command without actually attaching the container with the `exec` command:
+```
+$ docker exec <containerName> <specifiedCommand>
+```
+
+> With `exec`, we can execute commands in our running container without interrupting default commands, which starts when the container starts.
+
+Let's say you want to build a node application template while the node container running. After you run the container with `docker run -it -d node` command, you can now use the `exec` command like this:
+```
+$ docker exec -it <containerName> npm init
+```
+
+> `npm init` is a npm command that helps us create node application template very easily.
+
+We can also interrupt the default code. The default command for node is a node itself and letting us use the node, such as calculator. And if we want to run specified code before that, we can use the code after the image name like this:
+```
+$ docker run -it <imageName> <specifiedCommand>
+```
+
+Example:
+```
+$ docker run -it node npm init
+```
+
+> As default `docker run -it node` would start a node terminal and would exit once we finished. But, with us interrupping the default commands, node will start to build node tepmlate and then exit.
+
+Let's create a project with nothing inside. Just create a Dockerfile and add `FROM node:<version>` and `WORKDIR /app`, like this:
+```
+FROM node:14-alpine
+
+WORKDIR /app
+```
+
+Build the image with `docker build -t <imageName> .`. Then run the image with `docker run -it -v "<absolutePathOfProject>:/app" <imageName> npm init`.
+
+The run command will start the npm init command immediately and, once we gave the inputs for npm init, we will be able to see our **package.json** file in our local, thanks to bind mount we gave.
+
+## ENTRYPOINT
+As we mentioned. Adding specified command at the end of the run command will over-ride our default commands like we use as `CMD ["executable"]`. But since we can use node command, because we specified as `FROM node`, we can only use node commands. And we can actually make our run command simpler.
+
+To dockerfile exapmle above, we add `ENTRYPOINT` like this:
+```
+FROM node:14-alpine
+
+WORKDIR /app
+
+ENTRYPOINT [ "npm" ]
+```
+
+And after that, we do not have to simplify `npm` anymore. So our run command would be like this:
+```
+$ docker run -it -v "<absolutePathOfProject>:/app" <imageName> init
+```
+
+> We can also use `install` like this: `docker run -it -v "<absolutePathOfProject>:/app" <imageName> install express --save`. And since the container will stop each time, we also need to do this commands one by one.
+
+## Using Docker Compose
+At the example above, we had to use multiple run commands. We can also set a docker-compose for that.
+
+Add a `docker-compose.yaml` file and type the run commands, which will be like this:
+```
+version: '3.8'
+services:
+  npm:
+    build: ./
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app
+```
+But, there is a problem here. The problem is we are just executing only npm, because of the `ENTRYPOINT [ "npm" ]` command in our dockerfile.
+
+`docker-compose up` is ment to bring up services to find in a **docker-compose.yaml** file. For this utility containers, we have other commands:
+
+- `docker-compose exec` to run commands in already running containers, which were created by docker compose.
+
+- `docker-compose run ...` allows us to run a single service on the **docker-compose.yaml** file by the service name.
+
+So we can use that as:
+```
+$ docker-compose run npm init
+```
+
+> As you know, docker compose will remove the exited containers if you start the container with `docker-compose up command`. However, we are using `docker-compose run ...`. And that does not remove the containers. To remove exited containers with docker compose, we will add `--rm` command as we used before.
