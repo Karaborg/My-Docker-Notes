@@ -1221,7 +1221,7 @@ After that, we can finally try our **composer** service. To do that, we simply t
 If the application builded successfully, you can see new folders inside of your `src` file. And there, we can actually write some php code.
 
 ## Permission Error
-If you are using Docker on **Linux**, you might get some permission errors. It is because bind mounts. Try the following layer on your `php.dockerfile`:
+If you are using Docker on **Linux**, you might get some permission errors. It is because bind mounts. Try the following layers on your `php.dockerfile`:
 ```
 FROM php:8.0-fpm-alpine
  
