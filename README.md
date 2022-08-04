@@ -1044,3 +1044,178 @@ $ docker-compose run npm init
 ```
 
 > As you know, docker compose will remove the exited containers if you start the container with `docker-compose up command`. However, we are using `docker-compose run ...`. And that does not remove the containers. To remove exited containers with docker compose, we will add `--rm` command as we used before.
+
+# Dockerized Laravel & PHP
+Let's try something different. Until now, we already covered node and mongodb many times. And now we will be creating a PHP project to extend our knowledge.
+
+In this project, we will be using 6 containers: one container for `PHP Interpreter`, one for `Nginx Web Server`, one for `MySQL Database`; and we will have 3 other containers as utility for `Composer`, `Laravel Artisan` and `NPM`. Also, we will have our source code folder in our host machine. 
+
+## Nginx (Web Server) Container
+So we have a empty folder. First thing first, create `docker-compose.yaml` file. And we will add all the 6 services to our docker compose file. And, one of them is for `nginx`. We will specify an `ìmage`, `port` and a `bind mount` for **nginx.conf** file which you do not need to know much about it, we will use a basic template. At the end, your docker compose file should look like this:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #php:
+  #mysql:
+  #composer:
+  #artisan:
+  #npm:
+```
+
+> We specified `/etc/nginx/nginx.conf` path for our `nginx.conf` file. That path is already given us at [Nginx Docker Hub](https://hub.docker.com/_/nginx) page. So it is not just random path.
+
+As you can see, we included a nginx.conf file. So, create `nginx` folder and add `nginx.conf` file and that, which will have the following command:
+```
+server {
+    listen 80;
+    index index.php index.html;
+    server-name localhost;
+    root /var/www/html/public;
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass php:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+    }
+}
+```
+
+> We used `php` as IP and then give it port as `9000`. As we learned before, the containers need the container name as IP if they are inside of the same network. And the 9000 port is default exposed port from PHP.
+
+## PHP Container
+Create a folder as `dockerfiles`. Add a docker file named `php.dockerfile`. We will add the following commands in there:
+```
+FROM php:7.4-fpm-alpine
+
+WORKDIR /var/www/html
+
+RUN docker-php-ext-install pdo pdo_mysql
+```
+
+- We use php with the 7.4 version
+
+- We set the `/var/www/html` path which we already set in our `nginx.conf` file.
+
+- And we install pdo_mysql
+
+After this, we will add the following commands to our `docker-compose.yaml` file for the container `php`:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  #mysql:
+  #composer:
+  #artisan:
+  #npm:
+```
+
+- We set the specified the docker file detailed, because we have a `dockerfiles` folder now.
+
+- We have a `bind mount` for `src` folder which we need to create again. And we set that folder to same folder we set in our `nginx.conf` file.
+
+- We also added `delegated` at the end of our bind mount. That is for `optimization`. The docker will not keep sending the file or check the file so it will not use as much power as before.
+
+## MySQL Container
+First thing first, we need to check [MySQL Docker Hub](https://hub.docker.com/_/mysql) page because, MySQL has mandatory environment variables such as, rood password. We also want to add a separete user and password. But, we also want to give those variables from a `env` file. So, create a `env` folder, then inside of that folder, create a file named `mysql.env`, which will have the following variables:
+```
+MYSQL_DATABASE=homestead
+MYSQL_USER=homestead
+MYSQL_PASSWORD=secret
+MYSQL_ROOT_PASSWORD=secret
+```
+
+We then, add the env file to our docker compose file and also set our image like this:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/mysql.env
+  #composer:
+  #artisan:
+  #npm:
+```
+
+So far, we cannot check if we made a mistake. To check if all the thing we did working, we need `laravel`, which we will do next with our `composer` container.
+
+## Composer Utility Container
+We will start with creating a another dockerfile inside of our `dockerfiles` folder, which will be named `composer.dockerfile`.
+
+Then, we will add the following layers:
+```
+FROM composer:latest
+
+WORKDIR /var/www/html
+
+ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
+```
+
+After that, we will set our container to our docker compose file like this:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/mysql.env
+  composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
+  #artisan:
+  #npm:
+```
+
+After that, we can finally try our **composer** service. To do that, we simply try the command we can find in [Laravel Documentation](https://laravel.com/docs/9.x) which is `docker-compose run --rm composer create-project --prefer-dist laravel/laravel .`.
+
+If the application builded successfully, you can see new folders inside of your `src` file. And there, we can actually write some php code.
