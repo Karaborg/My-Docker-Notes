@@ -1060,7 +1060,7 @@ services:
     ports:
       - 8000:80
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
   #php:
   #mysql:
   #composer:
@@ -1075,7 +1075,7 @@ As you can see, we included a nginx.conf file. So, create `nginx` folder and add
 server {
     listen 80;
     index index.php index.html;
-    server-name localhost;
+    server_name localhost;
     root /var/www/html/public;
     location / {
         try_files $uri $uri/ /index.php?$query_string;
@@ -1086,7 +1086,7 @@ server {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param PATH_INFO $fastcgi_path_info;
     }
 }
@@ -1097,7 +1097,7 @@ server {
 ## PHP Container
 Create a folder as `dockerfiles`. Add a docker file named `php.dockerfile`. We will add the following commands in there:
 ```
-FROM php:7.4-fpm-alpine
+FROM php:8.1-fpm-alpine
 
 WORKDIR /var/www/html
 
@@ -1119,7 +1119,7 @@ services:
     ports:
       - 8000:80
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
   php:
     build:
       context: ./dockerfiles
@@ -1156,7 +1156,7 @@ services:
     ports:
       - 8000:80
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
   php:
     build:
       context: ./dockerfiles
@@ -1195,7 +1195,7 @@ services:
     ports:
       - 8000:80
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
   php:
     build:
       context: ./dockerfiles
@@ -1233,3 +1233,163 @@ RUN docker-php-ext-install pdo pdo_mysql
  
 RUN addgroup -g 1000 laravel && adduser -G laravel -g laravel -s /bin/sh -D laravel
 ```
+
+So, assuming the build was success, now we need to check the `.env` file inside `src` folder. Open the file and find db connection variables.
+
+We will change the `DB_HOST` as our container name which is `mysql`, and we will also need to change our `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` as we already clarifed in our `mysql.env` before. So it should look like this:
+```
+...
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=homestead
+DB_USERNAME=homestead
+DB_PASSWORD=secret
+...
+```
+
+Now, before we start, we also need to add another bind mount for our nginx. The server we created does not know which file to make a connection yet. So, we will open the `docker-compose.yaml` file again and add another bind mount under nginx service like this:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/mysql.env
+  composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
+  #artisan:
+  #npm:
+```
+
+The bind mount we gave as `./src:/var/www/html` under nginx server has the same path we already mentioned in our `nginx.conf` file.
+
+Now, we will just run the 3 containers which are, `server`, `php` and `mysql` with `docker-compose up -d server php mysql` command.
+
+## Permission Error
+There is a hight change of getting an permission error once you open `localhost:8000` on your browser. It is because `storage` folder inside of your `src` folder on your container. There are couple of way to fix that but, what I do is much easier:
+- Open **Docker Desktop**
+- Click on **Containers**
+- Click on your container name
+- It will bring up 3 containers to you, click on the container which has `server` somewhere
+- Open CLI
+- Go to `/var/www/html` which was the root path for service container.
+- Give the permission with `chmod o+w ./storage/ -R` command for **storage** folder
+
+After that, you will be able to see Lavarel Home Page when you go to `localhost:8000` on your browser.
+
+Moreover, assuming we have a running Laravel application. We also have our nginx service but, it does not recognize our code. To do that, we will add `depends-on` layer on our `docker-compose.yaml` file, like this:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+      - mysql
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/mysql.env
+  composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
+  #artisan:
+  #npm:
+```
+
+With that, we made sure that once we start the application, it will build `php` and `mysql` first, then it will build `service` container. And that also make our docker compose run command a bit easier now. We can now just specify `service` and not specify `php` and `mysql` services because, our service is depends on other 2. So we can start the 3 container with just `docker-compose up -d server` command. But, since we might want to change some code in our local, and we want docker to reflet those changes on our container too, we want to add `--build` command so whenever we use the `docker-compose up ...` command, the image will be re-build.
+
+## Adding More Utility Containers
+We will add the `artisan` and `npm` container to our `docker-compose.yaml` file like this:
+```
+version: '3.8'
+services:
+  server:
+    image: nginx:stable-alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+      - mysql
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/mysql.env
+  composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
+  artisan:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+    volumes:
+      - ./src:/var/www/html
+    entrypoint: ['php', '/var/www/html/artisan']
+  npm:
+    image: node:14
+    working_dir: /var/www/html
+    entrypoint: ['npm']
+    volumes:
+      - ./src:/var/www/html
+```
+
+For **artisan** service:
+- We used the same dockerfile for our `artisan` as we used for our `php` service, because artisan is also uses php
+- Add our source code to container with a **volume**
+- And we specified artisan file with a php command as **entrypoint**, which we can find the folder in our local too
+
+For **npm** service:
+- We specified it will run **NPM** with a version 14
+- It will have the working directory
+- A entrypoint of NPM
+- And again, our source code.
+
+After that we will start the artisan with a `docker-compose run --rm artisan migrate` command to migrate, so we can actually see if our database is working too. After the command, we should see our table, password and etc migrated with a `DONE` status.
+
+> Before running the artisan container, we assume your service container is already up and running.
+
+# Deploying Docker Containers
