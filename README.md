@@ -1393,3 +1393,58 @@ After that we will start the artisan with a `docker-compose run --rm artisan mig
 > Before running the artisan container, we assume your service container is already up and running.
 
 # Deploying Docker Containers
+So far, we build many applications on our local machine but, what if we use cloud machines such as, Amazon AWS, GCP or Microsoft Azure. We won't be go over every step detailed but just give some ideas and differences.
+
+## Amazon AWS (EC2)
+Let's start with Amazon AWS (EC2). Amazon provides us to rent us a cloud machine so we can actually deploy our application on remote. To deploy our application, simply follow the steps below:
+- Create an Amazon AWS accout [here](https://aws.amazon.com/) and sign in
+- Find `AWS Management Console` and search for `EC2`
+- Once you searched, you should be able to see something like `Launch Instance`, which will list operating systems
+- Choose `Amazon Linux 2 AMI`. Then, if you want to use it for free, make sure you choose ``free tier`option but, you can also choose more powerful instances
+- Once you choose, make sure you got `VPC` as networki which is default but, if you don't, create VPC. Then leave the rest as default and launch
+- Once you launch, you should be able to see `key pair` screen. This will be created once and only way you connect to cloud machine, which makes it very important.
+- Download the folder you got from `key pair` screen and place it under your project file.
+- Once you are done with that, Amazon AWS will create the machine and run it.
+- Open your instances page and check for status. If the server is running, click on `connect` and choose `SSH client`. On the same page you will see some permission steps too
+- After that, you can copy the command you got from the ``key pair` screen and enter into terminal. Which you are running from your project file where also key pair file is located
+- Enter the command `sudo yum update -y` which will ensure that your machine is updated
+- Install `Docker` with the command `sudo amazon-linux-extras install docker`
+- Start Docker service with `sudo service docker start` command
+- Now the machine is ready
+- After that, all you need to do is to upload your image to Docker Hub from your local, make sure you do not upload your `key pair` and sensitive files
+- And then pull the same image and run it from the cloud machine
+- To connect, check your `instances` page again and on right of your machine list, you should see `IPv4 Public IP` which you can connect to your application.
+- But before that, you need to open the instance to public. Amazon AWS EC2 has a security feature which disables public connections
+- To disable that, look for `Security Groups` on your EC2 Dashboard
+- After opening the security groups, choose the one you created. If are not sure which one it is, you can go back to instances list and check
+- On `Inbound Rules`, edit inbound rules
+- Add rule which is `HTTP` as type, `Anywhere` as source and save
+
+> If you want to update your project, simply update the image on Docker Hub and then pull the newer image on remote machine and restart it.
+
+## Amazon AWS (ECS)
+ECS service is similar to EC2 but there is a big difference. On EC2 service, we created an instance and pulled our project and started manually. On the other hand, ECS is automatic on creation, management, updates, monitoring and also scaling. Which makes it cost more.
+
+On ECS, the whole process is divided into 4 parts. `Container Definition`, `Task Definition`, `Service` and `Cluster`. Which we are configure step by step.
+
+Container Definition:
+- Seach for `ECS` service on Amazon AWS
+- Click on `Get Started`
+- On `Container Definition`, select ``Custom`
+- Give a name and then define your docker image link as you use on terminal to pull from Docker Hub
+- Configure the ports and update
+> You can also make spesific configuretion as you use on run commands.
+
+Tast Definition:
+- Make sure you use `FARGATE`
+
+Service:
+- Use defaults
+
+Cluster:
+- Assuming this the first, again, use defaults
+
+Then, create service and watch the service build. To connect, click on `tasks` tab and choose task and you will find a `Public IP`.
+To update your container, again, build the image again and push to docker hub. Once you update the image, open `Clusters` on your Amazon ECS dashboard, click on `Tasks` and then select the `task definition`. And then, from `Actions` button, click on `Update Service`.
+
+Multi-Container App
