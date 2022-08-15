@@ -813,9 +813,9 @@ volumes:
 
 So as you can see, we are added `backend` container now. So, first thing first, we used shared image for our `mongodb`. But, we do not have any images for backend. 
 
-- To tell compose to build the image, we use `build` tag. The example abone we told compose that, for backend, compose will go to `backend` folder which is also located under root directory, and look for `Dockerfile` spesificly. 
+- To tell compose to build the image, we use `build` tag. The example abone we told compose that, for backend, compose will go to `backend` folder which is also located under root directory, and look for `Dockerfile` specificly. 
 
-> `Build` tag has two types. Long and short. Short version is just a un-commented part on the example above and long version is commented. The difference is you can give spesifics with longer version.
+> `Build` tag has two types. Long and short. Short version is just a un-commented part on the example above and long version is commented. The difference is you can give specifics with longer version.
 
 - Ports, is just as it is.
 
@@ -1433,7 +1433,7 @@ Container Definition:
 - On `Container Definition`, select ``Custom`
 - Give a name and then define your docker image link as you use on terminal to pull from Docker Hub
 - Configure the ports and update
-> You can also make spesific configuretion as you use on run commands.
+> You can also make specific configuretion as you use on run commands.
 
 Tast Definition:
 - Make sure you use `FARGATE`
@@ -1448,3 +1448,86 @@ Then, create service and watch the service build. To connect, click on `tasks` t
 To update your container, again, build the image again and push to docker hub. Once you update the image, open `Clusters` on your Amazon ECS dashboard, click on `Tasks` and then select the `task definition`. And then, from `Actions` button, click on `Update Service`.
 
 Multi-Container App
+So, what we already covered, we can build multi-container application with `docker-compose`. Assuming we will be creating the same application with ECS service, some parts of that project needs to be changed.
+
+First, "**find the ip by container name**" feature will not work. When we were building the application on our local, we created a network and buided our containers inside of that network for connection between containers. And to do that, we also used container names as IP. That will not work on ECS service. But, when we are building the application on ECS, if we set the same task for the containers, we can guarantee those containers will have the same network on ECS. Moreover, we also need to change our IP's as `localhost`.
+> TIP: You can always use environment variable as IP, so it will not matter if it will run on ECS or local. All you need to do is give the proper variable value.
+
+After configuring the application. Build image for each one separately and push on Docker Hup. And follow the steps below:
+- Create cluster
+- Choose `Networking Only`, give a name and make sure VPC is created. You can use defaults for the rest. And then create
+- Select `Task Definitions` on ECS dashboard and create a new one with choosing `FARGATE`
+- Give a name, make sure you choose a `task role`. Choose `task size`
+- Then, click on `add container` and give a name
+- Give your image as we mentioned before
+- Make sure you map ports
+- Under `Environment`, make sure you over-write `nodemon start` command with adding `node,app.js` to `Commands`, because it will not work with ECS service
+- Also add the `environment variables` if you have, which we mentioned we will be using IP's as env. variables. The idea is, we will be using `.env` file to define variables. But since we do not use our run command manually on ECS, we will define them on here. Then, you can skip rest and use defaults
+- After you are done with tasks, click on create service
+- Choose `FARGATE` as launch type, choose you `task definition` and give a name, choose number `1` as `number of tasks`
+- Continue to `configure network`, choose VPC, and under `subnets`, choose your subnets which you should be able to choose
+- Make sure `auto-assign public IP` is enabled
+- And under `load balancing`, choose `application load balancer`. If it tells you there is no balancer, click on create, choose HTTP/HTTPS, give any name, it should be `internet-facing`, it shoud also expose port **80**, and it should connect to same VPC, you can also check boxes for `availability zones`, and continue
+- At `configure security group`, select existing security
+- Under `configure routing`, name it, choose `IP` as target type and click on register target, use defaults and continue creating
+- Choose your load balancer you just created
+- Choose target group name and use defaults until you create the service
+
+> The `public IP address` ECS assign changes, and that is not. To change that go to `Load Balancers > Group details > Edit` and give a proper endpoint under healh check path to ensure ECS service can check and approves. Also, in security groups, add your security group with the default one. This will also allow us to connect through `DNS name`.
+
+To update the container:
+- Push the updated image on Docker Hub
+- Click on `Update` on your `Service` screen
+- Check on `Force new deployment`
+- Skip the review
+- Click `Update Service`
+
+## Using Mongo DB Atlas
+We already builded our application with a mongodb but we can also use Mongo DB Atlas which is cloud database. Just make sure you use the same version on both your application connection and in the Mongo DB Atlas Cluster version. And make sure you give permission for your local or from anywhere and also define users. And that is actually it. Mongo DB Atlas will take care of everything else.
+
+# Multi-Stage Builds
+So we already have couple of docker files. If we need to give specific builds for particular applications, such as for `React JS`, we might need to use multi-stage builds. To separate stages, we simply add another `FROM` layer and continue adding layers based on that stage on our dockerfile. 
+
+Example:
+```
+FROM node:14-alpine as build
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:stable-alpine
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+As shown above, we separated our second stage with a `FROM nginx:stable-alpine` layer. That means that the build will change it's building stage based on that layer. We can also name stages as shown on the first layer which is `FROM node:14-alpine as build`. 
+
+We can also let docker build specific stage with a `--target` command, like this:
+```
+docker build --target build -f frontend/Dockerfile.prod ./frontend
+```
+> `-f` tag is for specifying the docker file.
+
+Couple of notes:
+- **Bind Mounts should not** be used in production!
+- Containerized applications **might need a build step** (e.g. React apps)
+- **Multi-Container projects** might need to be **split** (or should be split) across mutiple hosts / remote machines
+- **Trade-offs** between **control** and **responsibility** might be worth it! (e.g. AWS RDS, MongoDB Atlas)
+
+
+
+
+
+
+
