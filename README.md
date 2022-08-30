@@ -1,12 +1,12 @@
 # Welcome
-This is me taking notes on github while learning `Docker`. I will probably going to need this document when I forget how docker works. If you find someting usefull, be my guest. I will try to update this whenever I study.
+This is me taking notes on GitHub while learning `Docker`. I will probably be going to need this document when I forget how docker works. If you find something useful, be my guest. I will try to update this whenever I study.
 
 ## Setup
-First thing first, install docker extention to your IDE. It is **not a must** but, will help. To get started with docker, just open a new file and name it `Dockerfile`.
+First thing first, install the Docker extension to your IDE. It is **not a must** but, will help. To get started with docker, just open a new file and name it `Dockerfile`.
 
 
 ## Getting Started
-Imagine you want to run a **node js** web application with docker. As you many know, the first thing you need to do before starting the application is, getting the project root folder and installing the configurations and packages, which you do with `npm install` command and then you can start the app with `npm start`. So just like that, we will be including all these steps inside of our docker file.
+Imagine you want to run a **node js** web application with docker. As you may know, the first thing you need to do before starting the application is, to get the project root folder and install the configurations and packages, which you do with `npm install` command and then you can start the app with `npm start`. So just like that, we will be including all these steps inside of our docker file.
 
 Example:
 ```
@@ -26,21 +26,21 @@ CMD ["npm", "start"]
 ```
 
 To explain each command:
-- `FROM node:16`, it means the app is **node** application like we mentioned before and we want to use verison **16** of node. The version is not mandatory, you can also say `FROM node`.
+- `FROM node:16`, it means the app is **node** application like we mentioned before and we want to use version **16** of the Node. The version is not mandatory, you can also say `FROM node`.
 
 - `WORKDIR /app`, it sets the directory folder name as `/app` for our application for the image. And **all the commands will be executed under this directory**.
 
-- `COPY . /app`, this is a basic copy command. It means it will copy the local root folder to our new directory folder named `/app` we just created in previous line.
+- `COPY . /app`, this is a basic copy command. It means it will copy the local root folder to our new directory folder named `/app` we just created in the previous line.
 
-- `RUN npm install`, this is for downloading the **node-modules**. `RUN` command is just runs the command following it. So, since we already coppied our project, it is time for downloading the configurations and packages.
+- `RUN npm install`, this is for downloading the **node-modules**. `RUN` command just runs the command following it. So, since we already copied our project, it is time for downloading the configurations and packages.
 
-- `COPY . .`, same as before, it is just a copy command. First dot is our local root folder, and the second dot is our directory path we mentioned with `WORKDIR` command.
+- `COPY . .`, same as before, it is just a copy command. The first dot is our local root folder, and the second dot is the directory path we mentioned with `WORKDIR` command.
 
-- `EXPOSE 3000`, since we are starting a web application, we need an ip and a port to access this application. So this line exposes us a port for our local. **Not a must** because, we will clerify the port when we are starting the container again.
+- `EXPOSE 3000`, since we are starting a web application, we need an IP and a port to access this application. So this line exposes us to a port for our local. **Not a must** because we will clarify the port when we are starting the container again.
 
-- `CMD ["npm", "start"]`, `npm start` is the way we start the node application. But if we just say `RUN npm start`, it would start the application on every image build. We do not want that. Instead, we will be using `CMD` command with it's different syntax.
+- `CMD ["npm", "start"]`, `npm start` is the way we start the node application. But if we just say `RUN npm start`, it would start the application on every image build. We do not want that. Instead, we will be using `CMD` command with its different syntax.
 
-After we are finished with our docker file, it is time for build an image.
+After we are finished with our docker file, it is time to build an image.
 
 Build the docker image (Dot is for our root folder. If your docker file is located somewhere else, you should set the path as where the docker file is):
 ```
@@ -61,7 +61,7 @@ Check running containers (Only running containers):
 $ docker ps
 ```
 
-Check all containers (Containers that running and also the ones stopped at some point):
+Check all containers (Containers that are running and also the ones that stopped at some point):
 ```
 $ docker ps -a
 ```
@@ -73,18 +73,18 @@ $ docker stop <containerName>
 
 
 ## Also
-Since each container react as a different machine, it is possible to run a software even if you do not have it on your local computer. So let's run **node**.
+Since each container reacts as a different machine, it is possible to run software even if you do not have it on your local computer. So let's run **node**.
 ```
 $ docker run -it node
 ```
 
-With this command, the container will run node. It does not matter if the container already has node, if you have not download it before, docker will download it itself. The `-i` and `-t` flags stands for **interactive** and **terminal**. It says this container is **user interactive** and it also needs **terminal**.
+With this command, the container will run the node. It does not matter if the container already has node, if you have not downloaded it before, docker will download it itself. The `-i` and `-t` flags stand for **interactive**** and **terminal**. It says this container is **user interactive** and it also needs **terminal**.
 
-If you do any changes on your projects, you will need to re-build the image.
+If you do any changes to your projects, you will need to rebuild the image.
 
-All commands lines on docker files is a layer. And if you build the same project over and over again, docker will check the cache looking for any changes from previous build. If not, the image build will be much faster. Otherwise it will find a difference and the cache will build that particular layer again, which will take longer the build.
+All command lines on docker files are layers. And if you build the same project over and over again, docker will check the cache looking for any changes from the previous build. If not, the image build will be much faster. Otherwise, it will find a difference and the cache will build that particular layer again, which will take longer the build.
 
-**Optimization Note:** Whenever we build the image, we do not want docker to check `node-modules` folders unless it is necessary with the `RUN npm install`. So instead of using the example we explained before, we will be using it like below:
+**Optimization Note:** Whenever we build the image, we do not want docker to check `node-modules` folders unless it is necessary with the `RUN npm install`. So instead of using the example, we explained before, we will be using it like below:
 ```
 FROM node
 
@@ -100,7 +100,7 @@ EXPOSE 3000
 
 CMD ["npm", "start"]
 ```
-So at the end, docker will be building the image much faster and not check the `node-modules` all over again, because `package.json` did not change at all.
+So in the end, docker will be building the image much faster and not check the `node-modules` all over again, because `package.json` did not change at all.
 
 
 ## Start & Re-Start
@@ -118,7 +118,7 @@ $ docker start <imageId>
 
 
 ## Attach & Deattach Modes
-Attach and Deattach modes stands for listening the output of containers or not. The **attach** mode will let you listen the container and **deattach** will not.
+Attach and Deattach modes for listening to the output of containers or not. The **attach** mode will let you listen to the container and **deattach** will not.
 
 Run a container with **deattach** mode by adding `-d` flag:
 ```
@@ -130,7 +130,7 @@ $ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> -
 $ docker attach <imageName>
 ```
 
-**Attach** a re-started container with `logs` command and `-f` flag for follow logs:
+**Attach** a re-started container with `logs` command and `-f` flag for the following logs:
 ```
 $ docker logs -f <imageName>
 ```
@@ -142,12 +142,12 @@ docker start -a <imageName>
 
 
 ## Interactive Mode
-If you want to run a app that needs to get inputs from user, such as calculator like applications; you should run the container with 2 flags as we mentioned before. Which are `-i` for **interactive** and `-t` for **terminal**.
+If you want to run an app that needs to get inputs from users, such as calculator-like applications; you should run the container with 2 flags as we mentioned before. Which are `-i` for **interactive** and `-t` for **terminal**.
 ```
 $ docker run -it <imageId>
 ```
 
-Keep in mind, if you start a container which is calculator like application with **deattach mode**, it will fail. Because listening output of our container is closed. To **attach** the container we will be using `-a` for **attach** and `-i` for **interactive**.
+Keep in mind, that if you start a container that calculator-like application with **deattach mode**, it will fail. Because the listening output of our container is closed. To **attach** the container we will be using `-a` for **attach** and `-i` for **interactive**.
 ```
 $ docker start -a -i <imageId>
 ```
@@ -164,7 +164,7 @@ Check all images:
 $ docker images
 ```
 
-To delete a image:
+To delete an image:
 ```
 $ docker rmi <imageName>
 ```
@@ -188,14 +188,14 @@ $ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> -
 
 
 ## Inspecting Images
-To inspect a image, which will let you see all the details about the image:
+To inspect an image, which will let you see all the details about the image:
 ```
 $ docker image inspect <imageId>
 ```
 
 
 ## Copy File Into & From Container
-Copy from local to running container:
+Copy from local to the running container:
 ```
 $ docker cp <filePath> <imageName>:/<destinationPath>
 ```
@@ -204,7 +204,7 @@ Example:
 ```
 $ docker cp dummy/. eager_buck:/test
 ```
-This command above will copy **dummy** folder from local, and paste it into **test** folder in **eager_buck** container. If there is not folder named **test**, it will create one.
+This command above will copy **dummy** folder from the local, and paste it into **test** folder in **eager_buck** container. If there is no folder named **test**, it will create one.
 
 Copy form container to local:
 ```
@@ -215,7 +215,7 @@ Example:
 ```
 $ docker cp eager_buck:/test dummy
 ```
-This command above will copy **test** folder from **eager_buck** container, and paste it into **dummy** folder in our local. If there is not folder named **test**, it will create one.
+This command above will copy **test** folder from **eager_buck** container, and paste it into **dummy** folder in our local. If there is no folder named **test**, it will create one.
 
 Quick Test:
 ```
@@ -234,13 +234,13 @@ Name a container with `--name` flag:
 $ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> --name <containerName> <imageId>
 ```
 
-We will be naming images with `-t` flag but, naming images is a bit different. You have names and you can set tags from the same images. Like when you specify on docker file such as `FROM node:14`, you mean that will be node application which will be using version 14. So when you name a image you can name them **and** give a tag so you can have different tags with same names. Also tag can be a word or number and tagging is **optional** and if you do not specify the tag, docker will set the tag as **latest**.
+We will be naming images with `-t` flag but, naming images is a bit different. You have names and you can set tags from the same images. Like when you specify on Docker file such as `FROM node:14`, you mean that will be Node application will be using version 14. So when you name an image you can name them **and** give a tag so you can have different tags with the same names. Also, the tag can be a word or number and tagging is **optional**, if you do not specify the tag, docker will set the tag as **latest**.
 ```
 $ docker build -t <imageName>:<imageTag> .
 ```
 
 ## Re-Name Image
-Re-Name the existing image with tag command (tags are optional again):
+Re-Name the existing image with the tag command (tags are optional again):
 ```
 $ docker tag <existingImageName>:<existingImageTag> <newImageName>:<newImageTag>
 ```
@@ -249,7 +249,7 @@ $ docker tag <existingImageName>:<existingImageTag> <newImageName>:<newImageTag>
 - Create a [Docker Hub](https://hub.docker.com/) account
 - Open a repository
 - After creating the repository, it will create you a push command **with the repository name**
-- Your image name should be the **same as repository**
+- Your image name should be the **same as the repository**
 - After re-naming the image, you can use the push command Docker Hub created for you
 ```
 $ docker push <dockerId>/<repositoryName>:<imageTag>
@@ -274,11 +274,11 @@ To pull images (You can pull all the public shared images):
 $ docker pull <imageName>:<imageTag>
 ```
 
-You do not have to pull the image to run. Docker will search on docker hub if docker can not find in on local. So you could just enter run command without event pulling the image (for only public images).
+You do not have to pull the image to run. Docker will search on docker hub if docker can not find it on local. So you could just enter the run command without even pulling the image (for only public images).
 
 
 ## Introducing Volumes
-Let's say your web application creates a file and you want to save this file for later. Usually when you shutdown the container, all the data will be lost. To prevent that, we can use `VOLUME` command with a path in where the file is located.
+Let's say your web application creates a file and you want to save this file for later. Usually, when you shut down the container, all the data will be lost. To prevent that, we can use `VOLUME` command with a path where the file is located.
 
 dokerfile with a volume example:
 ```
@@ -299,13 +299,13 @@ VOLUME ["/app/feedback"]
 CMD ["npm", "start"]
 ```
 
-After specifying the `VOLUME`, the file will not be lost after you stop the container, **unless you delete the container**. Docker will save the file on our local but does not let you access. But, **docker will give volume a unique name each time you run the container** and that causes us to not use it like we want to use.
+After specifying the `VOLUME`, the file will not be lost after you stop the container **unless you delete the container**. Docker will save the file on our local but does not let you access it. But, **docker will give the volume a unique name each time you run the container** and that causes us to not use it like we want to use it.
 
 Therefore, there are 2 types of volumes: **anonymous volumes** and **named volumes**.
 
 > Anonymous volumes are closely attached to the container but, named volumes are not.
 
-To create named volume, we will specify it on our `docker run ...` command with a `-v` tag. **We cannot create named volumes on our docker file**.
+To create a named volume, we will specify it on our `docker run ...` command with a `-v` tag. **We cannot create named volumes on our docker file**.
 ```
 $ docker run -p <exposedPortForLocal>:<exposedPortYouMentionedOnDockerFile> -d --rm --name <containerName> -v <volumeName>:/<folderPath> <imageName>:<imageTag>
 ```
@@ -317,7 +317,7 @@ $ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback 
 
 The example above, we can create a volume named `feedback`, which saves the **feedback** folder located under `/app`. Keep in mind that, `/app` is our root directory in the container, we specified this on our docker file.
 
-After running our container with given command we mentioned in the example above, and then stop the container, which is removes the container because of the `--rm` tag, we still be able to have our volume. And if we run a new container with the same volume name and path, we will be able to access this volume file.
+After running our container with the given command we mentioned in the example above, and then stopping the container, which removes the container because of the `--rm` tag, we still can have our volume. And if we run a new container with the same volume name and path, we will be able to access this volume file.
 
 To list volumes:
 ```
@@ -336,7 +336,7 @@ $ docker volume prune
 
 
 ## Bind Mounts
-Let's say you have a web application to run with a docker. Since we **cannot change the container**, we also cannot edit our web application on docker. At least without building a new image and then running a container based on that image. Therefore, **bind mounts helps us make changes on out application inside our running container**.
+Let's say you have a web application to run with a docker. Since we **cannot change the container**, we also cannot edit our web application on docker. At least without building a new image and then running a container based on that image. Therefore, **bind mounts help us make changes to our application inside our running container**.
 
 > For windows user; we first need to follow the instructions [here](https://devblogs.microsoft.com/commandline/access-linux-filesystems-in-windows-and-wsl-2/)
 
@@ -376,9 +376,9 @@ Example:
 $ docker run -p 3000:3000 -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app -v /app/node-modules/ feedback-node:volumes
 ```
 
-With the command above; we are running a container which will be accessable from port `3000`; will be on deattached mode with a `-d` tag; will remove the container once the container stops with the `--rm` tag; will name the container as **feedback-app** with a `--name` tag; will save the folder which located under `/app/feedback` on our container to our host machine with a `-v` tag; will allow us to edit the application with a `-v` tag again; will prevent us to overwrite `node_modules` folder with a `-v` tag again; and this container will be based on **feedback-node** image which has a **volumes** tag.
+With the command above; we are running a container that will be accessible from port `3000`; will be on deattached mode with a `-d` tag; will remove the container once the container stops with the `--rm` tag; will name the container as **feedback-app** with a `--name` tag; will save the folder which located under `/app/feedback` on our container to our host machine with a `-v` tag; will allow us to edit the application with a `-v` tag again; will prevent us to overwrite `node_modules` folder with a `-v` tag again; and this container will be based on **feedback-node** image which has a **volumes** tag.
 
-So we ran our web application with volumes and bind mounts. Is it enough? No. As you may know, if you worked with node project, even if you can see the front-end changes, you still will not be able to see your back-end changes. This is a common issue with node projects. And there is also a solution for it. It is called `nodemon`. Nodemon will re-start your web application when you refresh the page and it helps us to get the back-end changes too.
+So we ran our web application with volumes and bind mounts. Is it enough? No. As you may know, if you worked with Node project, even if you can see the front-end changes, you still will not be able to see your back-end changes. This is a common issue with node projects. And there is also a solution for it. It is called `nodemon`. Nodemon will restart your web application when you refresh the page and it helps us to get the back-end changes too.
 
 To do so; we will add a new dependency on our application:
 1. Open package.json file
@@ -437,12 +437,12 @@ $ docker run -v /path/to/code:/app/code ...
 > Can be re-used for same containers.
 
 ## Read-Only Volumes
-So we now have a proper bind mount. The idea of the bind mount is that we want to make changes while the container is running. So we have **read** and **write** permit for our container. But, the container also has read and work permit for our app inside of the container. We do not want that. What we want is, we should be the only one making code changes. So we will give the bind mount a **read-only** permit.
+So we now have a proper bind mount. The idea of the bind mount is that we want to make changes while the container is running. So we have **read** and **write** permits for our container. But, the container also has a read and work permit for our app inside the container. We do not want that. What we want is, that we should be the only ones making code changes. So we will give the bind mount a **read-only** permit.
 > Container can't affect the project which is located in our host, it can only affect the project inside of that container.
 
-Before we get into that; we could also let our container to write for some folders. So we will give a read-only permit for the application but, we will **exclude some folders** so we can use the data inside of those folders later.
+Before we get into that; we could also let our container write for some folders. So we will give a read-only permit for the application but, we will **exclude some folders** so we can use the data inside of those folders later.
 
-To do so, we will just add `:ro` at the end of our bind mount and to exlude folders, we will just use `anonymous volumes`:
+To do so, we will just add `:ro` at the end of our bind mount and to exclude folders, we will just use `anonymous volumes`:
 ```
 $ docker run -p <portYouWantForLocal>:<theExposedPortYouMentionedOnDockerFile> -d --rm --name <containerName> -v <volumeName>:/<filePath> -v $(pwd):/<workdir>:ro -v /<workdir>/node_modules/ <imageName>:<imageTag>
 ```
@@ -456,20 +456,20 @@ So with the example above; we gave the bind mount a read-only permit. And we als
 > If we check the volume list with a `docker volume ls` command, we can see our all 3 volumes. 2 anonymous and 1 named. Keep in mind that, we cannot see our bind mount. It is not listed as **volume**.
 
 ## Important Note
-We are ran our container with a **volumes** and **bind mount** so far. And we know we are loading our application to container with that **bind mount**. So why do we have still `COPY . ./app` on our docker file, can we delete it from our docker file?
+We ran our container with a **volumes** and **bind mount** so far. And we know we are loading our application to the container with that **bind mount**. So why do we have still `COPY . ./app` on our docker file, can we delete it from our docker file?
 
-The answer is **yes**, but don't. Our application will run properly either way. But the thing is, we should not start our container with a bint mount if we are working on production. Because we might not be able to give a absolute path for the production. So we want to start our container with a snapshot (with `COPY` command).
+The answer is **yes**, but don't. Our application will run properly either way. But the thing is, we should not start our container with a bint mount if we are working on the production. Because we might not be able to give an absolute path for the production. So we want to start our container with a snapshot (with `COPY` command).
 
 ## Important Note
-We mentioned about `COPY . ./app` command before. Which means we copy all the files inside of the image. But, what if we do not want that. Our application might contain sensitive data and copying that data might be a serious mistake. Or we could just ignore some files, such as `node_modules`.
+We mentioned `COPY . ./app` command before. This means we copy all the files inside of the image. But, what if we do not want that? Our application might contain sensitive data and copying that data might be a serious mistake. Or we could just ignore some files, such as `node_modules`.
 
-To ignore files/folders for docker, we simply create `.dockerignore` file on our root directory like we created our dockerfile. The usage of this file is same is `.gitignore`.
+To ignore files/folders for docker, we simply create `.dockerignore` file on our root directory like we created our dockerfile. The usage of this file is the same as `.gitignore`.
 > While creating `.dockerignore`, do not forget about the dot at the beggining of the name.
 
 # Arguments & Environment Variables
 
 ## Environment Variables & .env Files
-To specify a environment variable, we will be using `ENV` command. Let's say we want our port as a environment variable. First thing first, we will add like `ENV <name> <value>`. So, our docker file should look like this:
+To specify an environment variable, we will be using `ENV` command. Let's say we want our port as an environment variable. First thing first, we will add like `ENV <name> <value>`. So, our docker file should look like this:
 ```
 FROM node
 
@@ -494,29 +494,29 @@ But that's not enough. In our main class, we still have it as hard-coded. So we 
 app.listen(process.env.PORT);
 ```
 
-We can also clerify variables in our run command. If we want to over-write our port from **3000** to **8000**, we can use `--env` or `-e` tags.
+We can also clarify variables in our run command. If we want to over-write our port from **3000** to **8000**, we can use `--env` or `-e` tags.
 
 Example:
 ```
 $  docker run -p 3000:8000 --env PORT=8000 -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app/ro -v /app/node_modules -v /app/temp feedback-node:env
 ```
-So we clerified our PORT variable as **8000**. Just do not forget that, after changing the port, we also need to change our exposed port source.
+So we clarified our PORT variable as **8000**. Just do not forget that, after changing the port, we also need to change our exposed port source.
 
-We can also give variables from a file. For such things, we create a file on our root project directory named `.env`. We then, can clerify the port as shown below in `.env` file:
+We can also give variables from a file. For such things, we create a file on our root project directory named `.env`. We then; can clarify the port as shown below in `.env` file:
 ```
 PORT=8000
 ```
 
-After doing so, we can simple show our .env file in our run command with a `--env-file` tag like this:
+After doing so, we can simply show our .env file in our run command with a `--env-file` tag like this:
 ```
 $ docker run -p 3000:8000 --env-file ./.env -d --rm --name feedback-app -v feedback:/app/feedback -v $(pwd):/app/ro -v /app/node_modules -v /app/temp feedback-node:env
 ```
 
 ## Important Note
-If your project has private keys, database urls etc. You might want to prefer using a separate environment variables file, like `.env` file. And make sure you added that file as ignored in your `.dockerignore` file. Otherwise anyone can see them with a simple `docker history <image>`.
+If your project has private keys, database URLs etc. You might want to prefer using a separate environment variables file, like `.env` file. And make sure you added that file as ignored in your `.dockerignore` file. Otherwise, anyone can see them with a simple `docker history <image>`.
 
 ## Build Arguments (ARG)
-We already changed clerified our port as environment but, we can still make it better. We can set a default value and use that value for our environment value **and** we can also change that value with a build command.
+We already changed and clarified our port as an environment but, we can still make it better. We can set a default value and use that value for our environment value **and** we can also change that value with a build command.
 
 To do that, we will add `ARG` command like this:
 ```
@@ -538,7 +538,7 @@ EXPOSE $PORT
 
 CMD ["npm", "start"]
 ```
-So we clefied our default port with a `ARG DEFAULT_PORT=3000` and we used that argument in our environment value as `ENV PORT $DEFAULT_PORT`.
+So we clarified our default port with a `ARG DEFAULT_PORT=3000` and we used that argument in our environment value as `ENV PORT $DEFAULT_PORT`.
 
 > We cannot use argument values in other classes, we can only use them in our docker file.
 
@@ -550,7 +550,7 @@ This will over-write our port as 8000 and we can access our app through this por
 
 
 # Containers & Network Requests
-Let's say your node application has API requests, like GET and POST requests. And maybe you have a local database and you want your dockerized application to communicate with this local application. It is also possible to dockerize a database and make them communicate each other. To do that, we will be focusing 3 different network requests:
+Let's say your node application has API requests, like GET and POST requests. And maybe you have a local database and you want your dockerized application to communicate with this local application. It is also possible to dockerize a database and make them communicate with each other. To do that, we will be focusing 3 different network requests:
 
 ## Requests from container to network
 This is the case when you want to use API. To manage APIs, you do not have to do anything different. Containers can manage that as long as your application is working.
@@ -560,10 +560,10 @@ Example:
 mongodb://localhost:27017/swfavorites
 ```
 
-## Requsts from container to your local
+## Requests from container to your local
 In this case, let's say your application needs to communicate with your local database. Your application would run if you were running on your local but, when you dockerize your application, it will not work.
 
-To fix this, you simply need to change your connection url. We are assuming your database url is something like `mongodb://localhost:27017/swfavorites`. That will not work. Because docker will not recognize `local`. What docker recognize is: `host.docker.internal`. So all you have to do is to change your url as mentioned.
+To fix this, you simply need to change your connection URL. We are assuming your database URL is something like `mongodb://localhost:27017/swfavorites`. That will not work. Because docker will not recognize `local`. What docker recognize is; `host.docker.internal`. So all you have to do is to change your url as mentioned.
 
 > As summary: use `host.docker.internal` rather than `localhost` on your local connetion urls.
 
@@ -572,18 +572,18 @@ Example:
 mongodb://host.docker.internal:27017/swfavorites
 ```
 
-## Request from container to other container
-So, in this case, let's say we want our mongodb database to run on a different container, and access that container from another container.
+## Request from container to other containers
+So, in this case, let's say we want our MongoDB database to run on a different container; and access that container from another container.
 
-And since we can run node on containers without even installing on our local, we can also run mongo on docker without installing it.
+And since we can run Node on containers without even installing on our local, we can also run mongo on docker without installing it.
 
-To run mongo on container, we will simple run the command below:
+To run mongo on a container, we will simply run the command below:
 ```
 $ docker run -d --name mongodb mongo
 ```
 > The command above will look at our images if we have `mongo` image. And since we do not, it will pull the official image from docker itself. If you are not certain how to call images, you can google as `docker mongodb` etc.
 
-Just keep in mind that, if you run docker inside of a container, neither `localhost`, nor `host.docker.internal` will work. Because our mongodb is not in our local. So we need to set our containers IP address.
+Just keep in mind that, if you run docker inside of a container, neither `localhost`, nor `host.docker.internal` will work. Because our MongoDB is not in our local. So we need to set our container's IP address.
 
 To find our containers IP address, we will use `inspect`:
 ```
@@ -592,18 +592,18 @@ $ docker container inspect <coontainerName>
 
 > Look for the tag called `IPAddress`, under `NetworkSettings`.
 
-After setting the IP as show above, you will be able to use your database and your application.
+After setting the IP as shown above, you will be able to use your database and your application.
 
 But, this is hard-coded. There is a better way. So, we already managed to run the application just fine but, the IP we used for communicating between one container and other might change. So to prevent that issue and also to make our application more secure, we will be using **Docker Network**.
 
-Docker Network is simply puts the container in a specified network. You can add other containers into that network. With that, all the containers inside of that network, will be able to communicate.
+Docker Network simply puts the container in a specified network. You can add other containers to that network. With that, all the containers inside of that network; will be able to communicate.
 
-To do so; we first need to create a network. To do create a network, we will be using `--network` tag:
+To do so; we first need to create a network. To create a network, we will be using `--network` tag:
 ```
 $ docker network create <networkName>
 ```
 
-After creating the network, we will be changing the url of our connection inside of our application. The part in our application, the `localhost`, or `host.docker.internal` part will actually be our **container name which we want to communicate**. So if you build your mongo container named like `mongodb`, you need to set the url as `mongodb`.
+After creating the network, we will be changing the URL of our connection inside of our application. The part in our application, the `localhost`, or `host.docker.internal` part will be our **container name which we want to communicate**. So if you build your mongo container named `mongodb`, you need to set the URL as `mongodb`.
 
 Example:
 ```
@@ -619,14 +619,14 @@ $ docker run -p 3000:3000 -d --rm --name <containerName> --network <networkName>
 
  
 # Building Multi-Container Application
-Let's say we want to run a web applicaiton. We want to run mongodb on a one container, back-end on an another container and, frontend on a different container. We also want to save a log file from backand application. And we also want to save the data from our mongodb. Plus, we also want our containers connected to each other.
+Let's say we want to run a web application. We want to run MongoDB on one container, back-end on another container and, frontend on a different container. We also want to save a log file from backend application. And we also want to save the data from our MongoDB. Plus, we also want our containers connected.
 
-## Starting with network:
+## Starting with the network:
 ```
  $ docker network create <networkName>
 ```
 
-## Then, mongodb:
+## Then, MongoDB:
 ```
 $ docker run -d --rm --name mongodb --network <networkName> mongo
 ```
@@ -703,13 +703,13 @@ $ docker run -d --rm --name mongodb -v data:/data/db --network <networkName> -e 
 ```
 > The tags we used as `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD` are again in the [docker mongo](https://hub.docker.com/_/mongo) page.
 
-If we run our container just like this, event our application cannot be able to access our database. So, we need to modify our db url too.
-Our database url was, let's say `mongodb://mongodb:27017/course-goals`. Now we need to modify as `mongodb://<username>:<password>@mongodb:27017/course-goals?authSource=admin` as shown in [Mongodb Documentation](https://www.mongodb.com/docs/manual/reference/connection-string/) page.
+If we run our container just like this, an event our application cannot be able to access our database. So, we need to modify our DB URL too.
+Our database URL was, let's say `mongodb://mongodb:27017/course-goals`. Now we need to modify as `mongodb://<username>:<password>@mongodb:27017/course-goals?authSource=admin` as shown in [MongoDB Documentation](https://www.mongodb.com/docs/manual/reference/connection-string/) page.
 
 > **IMPORTANT NOTE:** If you get an `Authentication failed` error, just delete the volume we created before while running mongo.
 
 # Docker Compose
-So far, we learned how to start containers and and build images with our dockerfile and we also learned how to add different options on our `build` and `run` commands. Like we did in the last practice, we used `-e`, `-v`, `--network` tags and so on. Since we had lots of things to add, these commands might get a bit long and it may increase to typo and fail. So, to make this easier and efficient, we will use **Docker Compose**. Which will help us **not to use long commands**. 
+So far, we learned how to start containers and build images with our dockerfile and we also learned how to add different options to our `build` and `run` commands. Like we did in the last practice, we used `-e`, `-v`, `--network` tags and so on. Since we had lots of things to add, these commands might get a bit long and it may increase typos and fail. So, to make this easier and more efficient, we will use **Docker Compose**. Which will help us **not to use long commands**. 
 
 > Docker compose **does not** replace `Dockerfiles`.
 
@@ -720,11 +720,11 @@ So far, we learned how to start containers and and build images with our dockerf
 ## To Start
 > If you are using `Linux`, you should install docker compose separately by following the [Install Docker Compose](https://docs.docker.com/compose/install/) page.
 
-We will first create a `yaml`/`yml` file named `docker-compose` on our root directory. So at the end, we will have a `docker-compose.yaml` file.
+We will first create a `yaml`/`yml` file named `docker-compose` on our root directory. So in the end, we will have a `docker-compose.yaml` file.
 
-In this file, we will be using a different syntax. And this file has some required parameters. Such as, `version` and `services`. These parameters are special, you do not want to shorten or modify the name, it should be just as it is.
+In this file, we will be using a different syntax. And this file has some required parameters. Such as; `version` and `services`. These parameters are special, you do not want to shorten or modify the name, and it should be just as it is.
 
-It is also important to check your blanks. Imagine as a JSON file without brackets.
+It is also important to check your blanks. Imagine it as a JSON file without brackets.
 
 > At this point, it would be very helpfull to add `Docker` extension on your IDE because, it will help you while writing.
 
@@ -750,34 +750,34 @@ volumes:
   data:
 ```
 
-- As you can see, we started with `version`, which defined as 3.8. And then `services`, which contains our `containers`. So, we can say **services** is actually **parent** of our **containers**.
+- As you can see, we started with `version`, which is defined as 3.8. And then `services`, which contain our `containers`. So, we can say **services** are **parent** of our **containers**.
 
 - We then defined images for our containers like `image: 'mongo'`.
 
 - Volumes are the same way we used in our commands
 
-- Environments are both acceptable for both example above. You can also use this as `env_file` as shown above. You just need to show the `env` file path which contains the variables such as `MONGO_INITDB_ROOT_USERNAME=username`.
+- Environments are both acceptable for both examples above. You can also use this as `env_file` as shown above. You just need to show the `env` file path which contains the variables such as `MONGO_INITDB_ROOT_USERNAME=username`.
 > `#` is used for comment lines.
 
-- Networks is just to clarify the network name.
+- Networks are just to clarify the network name.
 > Since docker composer will start all these containers together. We do not actually need to clearify a network because, they will be allowed to communicate. But there is nothing wrong with defining again.
 
 > If you noticed, we defined `volumes` also as upper title. That is because YAML want us to define **only** the `named volumes` again, just so we can use it in another containers too. **Anonymous volumes** and **bind mounts** are not included here.
 
 > Before running the compose, **clear** the `images`, `containers`, `volumes`. And start the compose from the root directory of your project file, which is also the same file your `docker-compose.yaml` located.
 
-So, after finishing with our docker compose file, we can start the compose with the command below. But, we also want this compose on deattach mode with the same `-d` tag. The stop command for compose is actually removes all the containers and images but, it does not removes `volumes`. To also remove those, we will also use `-v` tag.
+So, after finishing with our docker-compose file, we can start the compose with the command below. But, we also want this compose on deattach mode with the same `-d` tag. The stop command for compose removes all the containers and images but, it does not remove `volumes`. To also remove those, we will also use `-v` tag.
 ```
 $ docker-compose up -d -v
 ```
 
-To stop docker compose:
+To stop docker-compose:
 ```
 # docker-compose down
 ```
 
 ## Working With Multiple Containers
-We learned how to start a docker compose which includes a container. Now it is time for adding 2 more container which are actually our node/backend and react/frontend containers we already talked about before.
+We learned how to start a docker-compose which includes a container. Now it is time for adding 2 more containers which are our node/backend and react/frontend containers we already talked about before.
 
 Example:
 ```
@@ -811,15 +811,15 @@ volumes:
   data:
 ```
 
-So as you can see, we are added `backend` container now. So, first thing first, we used shared image for our `mongodb`. But, we do not have any images for backend. 
+So as you can see, we are adding `backend` container now. So, first thing first, we used the shared image for our `mongodb`. But, we do not have any images for the backend. 
 
-- To tell compose to build the image, we use `build` tag. The example abone we told compose that, for backend, compose will go to `backend` folder which is also located under root directory, and look for `Dockerfile` specificly. 
+- To tell compose to build the image, we use `build` tag. In the example above we told compose that, for the backend, compose will go to `backend` folder which is also located under the root directory, and look for `Dockerfile` specifically. 
 
 > `Build` tag has two types. Long and short. Short version is just a un-commented part on the example above and long version is commented. The difference is you can give specifics with longer version.
 
-- Ports, is just as it is.
+- Ports; is just as it is.
 
-- Volumes, we have 3 volumes here. At the top we can see the ``named volume` as we did before. The second one is `bind mount`. As you remember, in bind mounts, we need to use absolute paths but in our docker compose, we do not need that. So we just show the path we want to use. And lastly, we have a `anonymous volume` which is same as it is.
+- Volumes, we have 3 volumes here. At the top, we can see the ``named volume` as we did before. The second one is `bind mount`. As you remember, in bind mounts, we need to use absolute paths but in our docker-compose, we do not need that. So we just show the path we want to use. And lastly, we have an `anonymous volume` which is the same as it is.
 
 - Depends On is, we tell compose this container is depending on the `mongodb` container. So, compose will know which one to build first.
 
@@ -867,25 +867,25 @@ volumes:
   logs:
 ```
 
-- So now, we told docker to look for a `Dockerfile` under `frontend` folder.
+- So now, we told docker to look for a `Dockerfile` under the `frontend` folder.
 
 - The `ports` are as is.
 
 - We have a bind mount for the path `/app/src`
 
-- So as we discussed before, react is run as interactive. We were running this container with `-it` tags. So, to do same on our docker compose, we are using both `stdin_open` tag for telling, this container will be able to get inputs, and `tty` tag for telling this container will need a terminal.
+- So as we discussed before, react is run as interactive. We were running this container with `-it` tags. So, to do the same on our docker-compose, we are using both `stdin_open` tags for telling, this container will be able to get inputs, and `tty` tag for telling this container will need a terminal.
 > We start the docker composer on deattach mode so we will not be seeing this terminal for the react, but the terminal will be there on browser.
 
 ## Also
-We learned `docker-compose run` will build our images and run the containers. However, if the images already builded or are public images, compose will not build the images again. To forse compose **re-build** images every time we start, we can use `build`:
+We learned that `docker-compose run` will build our images and run the containers. However, if the images are already built or are public images, compose will not build the images again. To force compose **re-build** images every time we start, we can use `build`:
 ```
 docker-compose build 
 ```
 
-If you noticed, when we start our containers with docker compose, the compose will assign names to each container. The names will include our container names but, not the same name as we defined. To set the names as we want, we can add `container_name: <containerName>` to our `docker-compose.yaml` file under each container.
+If you noticed, when we start our containers with docker-compose, the compose will assign names to each container. The names will include our container names but, not the same name as we defined. To set the names as we want, we can add `container_name: <containerName>` to our `docker-compose.yaml` file under each container.
 
 ## In conclusion
-So at the end, our whole `docker-compose.yaml` file will be looking like this:
+So in the end, our whole `docker-compose.yaml` file will be looking like this:
 ```
 version: "3.8"
 services:
@@ -935,8 +935,8 @@ volumes:
 ```
 
 # VoltDB on Docker
-Let's run 3 node local `VoltDB` cluster:
-- Create a network so nodes can connect to each others.
+Let's run 3 Node local `VoltDB` cluster:
+- Create a network so nodes can connect.
 - Start each node one by one.
 - List exposed ports to our local.
 ```
@@ -951,16 +951,16 @@ $ docker port node1
 
 > To connect with `sqlcmd`; open a terminal from the container, you can easily open a terminal from containers tab if you installed `Docker Desktop`. You can connect by using `sqlcmd --servers=<containerName>`, we used `node1`, `node2` and `node3`. Or `sqlcmd --port=<clientPort>`, the client port is `21212` by default.
 
-The main idea about which port to use is that, if you are connecting the voltdb from **outside** of the container, you should use the exposed ports for your local. And if you are connecting from **inside** of the container, you can simple use the default voltdb ports.
+The main idea about which port to use is that, if you are connecting the voltdb from **outside** of the container, you should use the exposed ports for your local. And if you are connecting from **inside** of the container, you can simply use the default voltdb ports.
 
 > For more info, check out [Docker Hub](https://hub.docker.com/r/voltdb/voltdb-community). And [this](https://vimeo.com/378332643) video might help too.
 
 To start a 1 node VoltDB, use the run command like this: `docker run -d -P -e HOST_COUNT=1 -e HOSTS=node1 --name=node1 --network=voltLocalCluster voltdb/voltdb-community:6.6`, and that is it.
 
 # Utility Containers
-We already covered how we can set environments and run applications with docker. But we can also use docker just to set environmets, such as node.
+We already covered how we can set environments and run applications with docker. But we can also use docker just to set environments, such as Node.
 
-To give a simple example; if we run node with a `docker run -it -d node`, the node application will run and wait for the input. Therefore, while the node application waiting for input, we can run a command without actually attaching the container with the `exec` command:
+To give a simple example; if we run Node with a `docker run -it -d node`, the node application will run and wait for the input. Therefore, while the node application waiting for input, we can run a command without actually attaching the container with the `exec` command:
 ```
 $ docker exec <containerName> <specifiedCommand>
 ```
@@ -974,7 +974,7 @@ $ docker exec -it <containerName> npm init
 
 > `npm init` is a npm command that helps us create node application template very easily.
 
-We can also interrupt the default code. The default command for node is a node itself and letting us use the node, such as calculator. And if we want to run specified code before that, we can use the code after the image name like this:
+We can also interrupt the default code. The default command for Node is a node itself and lets us use the node, such as a calculator. And if we want to run specified code before that, we can use the code after the image name like this:
 ```
 $ docker run -it <imageName> <specifiedCommand>
 ```
@@ -995,12 +995,12 @@ WORKDIR /app
 
 Build the image with `docker build -t <imageName> .`. Then run the image with `docker run -it -v "<absolutePathOfProject>:/app" <imageName> npm init`.
 
-The run command will start the npm init command immediately and, once we gave the inputs for npm init, we will be able to see our **package.json** file in our local, thanks to bind mount we gave.
+The run command will start the npm init command immediately and, once we gave the inputs for npm init, we will be able to see our **package.json** file in our local, thanks to the bind mount we gave.
 
 ## ENTRYPOINT
-As we mentioned. Adding specified command at the end of the run command will over-ride our default commands like we use as `CMD ["executable"]`. But since we can use node command, because we specified as `FROM node`, we can only use node commands. And we can actually make our run command simpler.
+As we mentioned. Adding specified commands at the end of the run command will override our default commands as we use as `CMD ["executable"]`. But since we can use node command, because we specified as `FROM node`, we can only use node commands. And we can actually make our run command simpler.
 
-To dockerfile exapmle above, we add `ENTRYPOINT` like this:
+To dockerfile example above, we add `ENTRYPOINT` like this:
 ```
 FROM node:14-alpine
 
@@ -1017,7 +1017,7 @@ $ docker run -it -v "<absolutePathOfProject>:/app" <imageName> init
 > We can also use `install` like this: `docker run -it -v "<absolutePathOfProject>:/app" <imageName> install express --save`. And since the container will stop each time, we also need to do this commands one by one.
 
 ## Using Docker Compose
-At the example above, we had to use multiple run commands. We can also set a docker-compose for that.
+In the example above, we had to use multiple run commands. We can also set a docker-compose for that.
 
 Add a `docker-compose.yaml` file and type the run commands, which will be like this:
 ```
@@ -1032,9 +1032,9 @@ services:
 ```
 But, there is a problem here. The problem is we are just executing only npm, because of the `ENTRYPOINT [ "npm" ]` command in our dockerfile.
 
-`docker-compose up` is ment to bring up services to find in a **docker-compose.yaml** file. For this utility containers, we have other commands:
+`docker-compose up` is meant to bring up services to find in a **docker-compose.yaml** file. For these utility containers, we have other commands:
 
-- `docker-compose exec` to run commands in already running containers, which were created by docker compose.
+- `docker-compose exec` to run commands in already running containers, which were created by docker-compose.
 
 - `docker-compose run ...` allows us to run a single service on the **docker-compose.yaml** file by the service name.
 
@@ -1046,12 +1046,12 @@ $ docker-compose run npm init
 > As you know, docker compose will remove the exited containers if you start the container with `docker-compose up command`. However, we are using `docker-compose run ...`. And that does not remove the containers. To remove exited containers with docker compose, we will add `--rm` command as we used before.
 
 # Dockerized Laravel & PHP
-Let's try something different. Until now, we already covered node and mongodb many times. And now we will be creating a PHP project to extend our knowledge.
+Let's try something different. Until now, we already covered node and MongoDB many times. And now we will be creating a PHP project to extend our knowledge.
 
-In this project, we will be using 6 containers: one container for `PHP Interpreter`, one for `Nginx Web Server`, one for `MySQL Database`; and we will have 3 other containers as utility for `Composer`, `Laravel Artisan` and `NPM`. Also, we will have our source code folder in our host machine. 
+In this project, we will be using 6 containers: one container for `PHP Interpreter`, one for `Nginx Web Server`, and one for `MySQL Database`; and we will have 3 other containers as utilities for `Composer``, `Laravel Artisan` and `NPM`. Also, we will have our source code folder on our host machine. 
 
 ## Nginx (Web Server) Container
-So we have a empty folder. First thing first, create `docker-compose.yaml` file. And we will add all the 6 services to our docker compose file. And, one of them is for `nginx`. We will specify an `ìmage`, `port` and a `bind mount` for **nginx.conf** file which you do not need to know much about it, we will use a basic template. At the end, your docker compose file should look like this:
+So we have an empty folder. First thing first, let's create `docker-compose.yaml` file. And we will add all 6 services to our docker-compose file. And, one of them is for `nginx`. We will specify an `ìmage`, `port` and a `bind mount` for **nginx.conf** file which you do not need to know much about it, we will use a basic template. In the end, your docker-compose file should look like this:
 ```
 version: '3.8'
 services:
@@ -1070,7 +1070,7 @@ services:
 
 > We specified `/etc/nginx/nginx.conf` path for our `nginx.conf` file. That path is already given us at [Nginx Docker Hub](https://hub.docker.com/_/nginx) page. So it is not just random path.
 
-As you can see, we included a nginx.conf file. So, create `nginx` folder and add `nginx.conf` file and that, which will have the following command:
+As you can see, we included an nginx.conf file. So, create `nginx` folder and add `nginx.conf` file that, which will have the following command:
 ```
 server {
     listen 80;
@@ -1104,7 +1104,7 @@ WORKDIR /var/www/html
 RUN docker-php-ext-install pdo pdo_mysql
 ```
 
-- We use php with the 7.4 version
+- We use PHP with the 7.4 version
 
 - We set the `/var/www/html` path which we already set in our `nginx.conf` file.
 
@@ -1132,14 +1132,14 @@ services:
   #npm:
 ```
 
-- We set the specified the docker file detailed, because we have a `dockerfiles` folder now.
+- We set the specified docker file detailed; because we have a `dockerfiles` folder now.
 
-- We have a `bind mount` for `src` folder which we need to create again. And we set that folder to same folder we set in our `nginx.conf` file.
+- We have a `bind mount` for `src` folder which we need to create again. And we set that folder to the same folder we set in our `nginx.conf` file.
 
-- We also added `delegated` at the end of our bind mount. That is for `optimization`. The docker will not keep sending the file or check the file so it will not use as much power as before.
+- We also added `delegated` at the end of our bind mount. That is for `optimization`. The docker will not keep sending the file or checking the file so it will not use as much power as before.
 
 ## MySQL Container
-First thing first, we need to check [MySQL Docker Hub](https://hub.docker.com/_/mysql) page because, MySQL has mandatory environment variables such as, rood password. We also want to add a separete user and password. But, we also want to give those variables from a `env` file. So, create a `env` folder, then inside of that folder, create a file named `mysql.env`, which will have the following variables:
+First thing first, we need to check the [MySQL Docker Hub](https://hub.docker.com/_/mysql) page because; MySQL has mandatory environment variables such as; rood password. We also want to add a separate user and password. But, we also want to give those variables from a `env` file. So, create a `env` folder, then inside of that folder, create a file named `mysql.env`, which will have the following variables:
 ```
 MYSQL_DATABASE=homestead
 MYSQL_USER=homestead
@@ -1147,7 +1147,7 @@ MYSQL_PASSWORD=secret
 MYSQL_ROOT_PASSWORD=secret
 ```
 
-We then, add the env file to our docker compose file and also set our image like this:
+We then, add the env file to our docker-compose file and also set our image like this:
 ```
 version: '3.8'
 services:
@@ -1172,10 +1172,10 @@ services:
   #npm:
 ```
 
-So far, we cannot check if we made a mistake. To check if all the thing we did working, we need `laravel`, which we will do next with our `composer` container.
+So far, we cannot check if we made a mistake. To check if all the things we did working, we need `laravel`, which we will do next with our `composer` container.
 
 ## Composer Utility Container
-We will start with creating a another dockerfile inside of our `dockerfiles` folder, which will be named `composer.dockerfile`.
+We will start with creating another dockerfile inside of our `dockerfiles` folder, which will be named `composer.dockerfile`.
 
 Then, we will add the following layers:
 ```
@@ -1186,7 +1186,7 @@ WORKDIR /var/www/html
 ENTRYPOINT [ "composer", "--ignore-platform-reqs" ]
 ```
 
-After that, we will set our container to our docker compose file like this:
+After that, we will set our container to our docker-compose file like this:
 ```
 version: '3.8'
 services:
@@ -1218,10 +1218,10 @@ services:
 
 After that, we can finally try our **composer** service. To do that, we simply try the command we can find in [Laravel Documentation](https://laravel.com/docs/9.x) which is `docker-compose run --rm composer create-project --prefer-dist laravel/laravel .`.
 
-If the application builded successfully, you can see new folders inside of your `src` file. And there, we can actually write some php code.
+If the application is built successfully, you can see new folders inside of your `src` file. And there, we can write some PHP code.
 
 ## Permission Error
-If you are using Docker on **Linux**, you might get some permission errors. It is because bind mounts. Try the following layers on your `php.dockerfile`:
+If you are using Docker on **Linux**, you might get some permission errors. It is because the bind mounts. Try the following layers on your `php.dockerfile`:
 ```
 FROM php:8.0-fpm-alpine
  
@@ -1234,9 +1234,9 @@ RUN docker-php-ext-install pdo pdo_mysql
 RUN addgroup -g 1000 laravel && adduser -G laravel -g laravel -s /bin/sh -D laravel
 ```
 
-So, assuming the build was success, now we need to check the `.env` file inside `src` folder. Open the file and find db connection variables.
+So, assuming the build was a success, now we need to check the `.env` file inside `src` folder. Open the file and find DB connection variables.
 
-We will change the `DB_HOST` as our container name which is `mysql`, and we will also need to change our `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` as we already clarifed in our `mysql.env` before. So it should look like this:
+We will change the `DB_HOST` as our `mysql` container name, and we will also need to change our `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` as we already clarified in our `mysql.env` before. So it should look like this:
 ```
 ...
 DB_CONNECTION=mysql
@@ -1248,7 +1248,7 @@ DB_PASSWORD=secret
 ...
 ```
 
-Now, before we start, we also need to add another bind mount for our nginx. The server we created does not know which file to make a connection yet. So, we will open the `docker-compose.yaml` file again and add another bind mount under nginx service like this:
+Now, before we start, we also need to add another bind mount for our Nginx. The server we created does not know which file to make a connection to yet. So, we will open the `docker-compose.yaml` file again and add another bind mount under Nginx service like this:
 ```
 version: '3.8'
 services:
@@ -1279,23 +1279,23 @@ services:
   #npm:
 ```
 
-The bind mount we gave as `./src:/var/www/html` under nginx server has the same path we already mentioned in our `nginx.conf` file.
+The bind mount we gave as `./src:/var/www/html` under Nginx server has the same path we already mentioned in our `nginx.conf` file.
 
 Now, we will just run the 3 containers which are, `server`, `php` and `mysql` with `docker-compose up -d server php mysql` command.
 
 ## Permission Error
-There is a hight change of getting an permission error once you open `localhost:8000` on your browser. It is because `storage` folder inside of your `src` folder on your container. There are couple of way to fix that but, what I do is much easier:
+There is a high chance of getting a permission error once you open `localhost:8000` on your browser. It is because of; `storage` folder inside of your `src` folder on your container. There is couple of ways to fix that but, what I do is much easier:
 - Open **Docker Desktop**
 - Click on **Containers**
 - Click on your container name
 - It will bring up 3 containers to you, click on the container which has `server` somewhere
 - Open CLI
-- Go to `/var/www/html` which was the root path for service container.
+- Go to `/var/www/html` which was the root path for the service container.
 - Give the permission with `chmod o+w ./storage/ -R` command for **storage** folder
 
-After that, you will be able to see Lavarel Home Page when you go to `localhost:8000` on your browser.
+After that, you will be able to see Lavarel's Home Page when you go to `localhost:8000` on your browser.
 
-Moreover, assuming we have a running Laravel application. We also have our nginx service but, it does not recognize our code. To do that, we will add `depends-on` layer on our `docker-compose.yaml` file, like this:
+Moreover, assuming we have a running Laravel application. We also have our Nginx service but, it does not recognize our code. To do that, we will add `depends-on` layer on our `docker-compose.yaml` file, like this:
 ```
 version: '3.8'
 services:
@@ -1329,7 +1329,7 @@ services:
   #npm:
 ```
 
-With that, we made sure that once we start the application, it will build `php` and `mysql` first, then it will build `service` container. And that also make our docker compose run command a bit easier now. We can now just specify `service` and not specify `php` and `mysql` services because, our service is depends on other 2. So we can start the 3 container with just `docker-compose up -d server` command. But, since we might want to change some code in our local, and we want docker to reflet those changes on our container too, we want to add `--build` command so whenever we use the `docker-compose up ...` command, the image will be re-build.
+With that, we made sure that once we start the application, it will build `php` and `mysql` first, then it will build `service` container. And that also makes our docker-compose run command a bit easier now. We can now just specify `service` and not specify `php` and `mysql` services because; our service depends on the other 2. So we can start the 3 containers with just the `docker-compose up -d server` command. But, since we might want to change some code in our local, and we want docker to reflect those changes on our container too, we want to add `--build` command so whenever we use the `docker-compose up ...` command, the image will be rebuilt.
 
 ## Adding More Utility Containers
 We will add the `artisan` and `npm` container to our `docker-compose.yaml` file like this:
@@ -1378,9 +1378,9 @@ services:
 ```
 
 For **artisan** service:
-- We used the same dockerfile for our `artisan` as we used for our `php` service, because artisan is also uses php
-- Add our source code to container with a **volume**
-- And we specified artisan file with a php command as **entrypoint**, which we can find the folder in our local too
+- We used the same dockerfile for our `artisan` as we used for our `php` service; because artisan also uses PHP
+- Add our source code to a container with a **volume**
+- And we specified artisan file with a PHP command as **entrypoint**, which we can find the folder in our local too
 
 For **npm** service:
 - We specified it will run **NPM** with a version 14
@@ -1393,85 +1393,85 @@ After that we will start the artisan with a `docker-compose run --rm artisan mig
 > Before running the artisan container, we assume your service container is already up and running.
 
 # Deploying Docker Containers
-So far, we build many applications on our local machine but, what if we use cloud machines such as, Amazon AWS, GCP or Microsoft Azure. We won't be go over every step detailed but just give some ideas and differences.
+So far, we build many applications on our local machine but, what if we use cloud machines such as; Amazon AWS, GCP or Microsoft Azure? We won't go over every step detailed but just give some ideas and differences.
 
 ## Amazon AWS (EC2)
-Let's start with Amazon AWS (EC2). Amazon provides us to rent us a cloud machine so we can actually deploy our application on remote. To deploy our application, simply follow the steps below:
-- Create an Amazon AWS accout [here](https://aws.amazon.com/) and sign in
+Let's start with Amazon AWS (EC2). Amazon provides us to rent a cloud machine so we can deploy our application remotely. To deploy our application, simply follow the steps below:
+- Create an Amazon AWS account [here](https://aws.amazon.com/) and sign in
 - Find `AWS Management Console` and search for `EC2`
-- Once you searched, you should be able to see something like `Launch Instance`, which will list operating systems
-- Choose `Amazon Linux 2 AMI`. Then, if you want to use it for free, make sure you choose ``free tier`option but, you can also choose more powerful instances
-- Once you choose, make sure you got `VPC` as networki which is default but, if you don't, create VPC. Then leave the rest as default and launch
-- Once you launch, you should be able to see `key pair` screen. This will be created once and only way you connect to cloud machine, which makes it very important.
+- Once you search, you should be able to see something like `Launch Instance`, which will list operating systems
+- Choose `Amazon Linux 2 AMI`. Then, if you want to use it for free, make sure you choose `free tier` option but, you can also choose more powerful instances
+- Once you choose, make sure you got `VPC` as a network which is the default but, if you don't, create VPC. Then leave the rest as default and launch
+- Once you launch, you should be able to see `key pair` screen. This will be created once and is the only way you connect to a cloud machine, which makes it very important.
 - Download the folder you got from `key pair` screen and place it under your project file.
 - Once you are done with that, Amazon AWS will create the machine and run it.
-- Open your instances page and check for status. If the server is running, click on `connect` and choose `SSH client`. On the same page you will see some permission steps too
-- After that, you can copy the command you got from the ``key pair` screen and enter into terminal. Which you are running from your project file where also key pair file is located
+- Open your instances page and check for status. If the server is running, click on `connect` and choose `SSH client`. On the same page, you will see some permission steps too
+- After that, you can copy the command you got from the ``key pair` screen and enter it into the terminal. Which you are running from your project file where also key pair file is located
 - Enter the command `sudo yum update -y` which will ensure that your machine is updated
 - Install `Docker` with the command `sudo amazon-linux-extras install docker`
 - Start Docker service with `sudo service docker start` command
 - Now the machine is ready
 - After that, all you need to do is to upload your image to Docker Hub from your local, make sure you do not upload your `key pair` and sensitive files
 - And then pull the same image and run it from the cloud machine
-- To connect, check your `instances` page again and on right of your machine list, you should see `IPv4 Public IP` which you can connect to your application.
-- But before that, you need to open the instance to public. Amazon AWS EC2 has a security feature which disables public connections
+- To connect, check your `instances` page again and on the right of your machine list, you should see `IPv4 Public IP` which you can connect to your application.
+- But before that, you need to open the instance to the public. Amazon AWS EC2 has a security feature that disables public connections
 - To disable that, look for `Security Groups` on your EC2 Dashboard
-- After opening the security groups, choose the one you created. If are not sure which one it is, you can go back to instances list and check
+- After opening the security groups, choose the one you created. If are not sure which one it is, you can go back to the instances list and check
 - On `Inbound Rules`, edit inbound rules
-- Add rule which is `HTTP` as type, `Anywhere` as source and save
+- Add a rule which is `HTTP` as type, `Anywhere` as the source and save
 
 > If you want to update your project, simply update the image on Docker Hub and then pull the newer image on remote machine and restart it.
 
 ## Amazon AWS (ECS)
-ECS service is similar to EC2 but there is a big difference. On EC2 service, we created an instance and pulled our project and started manually. On the other hand, ECS is automatic on creation, management, updates, monitoring and also scaling. Which makes it cost more.
+ECS service is similar to EC2 but there is a big difference. On the EC2 service, we created an instance and pulled our project and started manually. On the other hand, ECS is automatic in creation, management, updates, monitoring and also scaling. Which makes it cost more.
 
 On ECS, the whole process is divided into 4 parts. `Container Definition`, `Task Definition`, `Service` and `Cluster`. Which we are configure step by step.
 
 Container Definition:
-- Seach for `ECS` service on Amazon AWS
+- Search for `ECS` service on Amazon AWS
 - Click on `Get Started`
 - On `Container Definition`, select ``Custom`
-- Give a name and then define your docker image link as you use on terminal to pull from Docker Hub
+- Give a name and then define your docker image link as you use on the terminal to pull from Docker Hub
 - Configure the ports and update
 > You can also make specific configuretion as you use on run commands.
 
-Tast Definition:
+Task Definition:
 - Make sure you use `FARGATE`
 
 Service:
 - Use defaults
 
 Cluster:
-- Assuming this the first, again, use defaults
+- Assuming this is the first, again, use defaults
 
-Then, create service and watch the service build. To connect, click on `tasks` tab and choose task and you will find a `Public IP`.
-To update your container, again, build the image again and push to docker hub. Once you update the image, open `Clusters` on your Amazon ECS dashboard, click on `Tasks` and then select the `task definition`. And then, from `Actions` button, click on `Update Service`.
+Then, create a service and watch the service building. To connect, click on `tasks` tab and choose a task and you will find a `Public IP`.
+To update your container, again, build the image and push it to DockerHub. Once you update the image, open `Clusters` on your Amazon ECS dashboard, click on `Tasks` and then select the `task definition`. And then, from `Actions` button, click on `Update Service`.
 
 Multi-Container App
-So, what we already covered, we can build multi-container application with `docker-compose`. Assuming we will be creating the same application with ECS service, some parts of that project needs to be changed.
+So, what we already covered, we can build a multi-container application with `docker-compose`. Assuming we will be creating the same application with ECS service, some parts of that project need to be changed.
 
-First, "**find the ip by container name**" feature will not work. When we were building the application on our local, we created a network and buided our containers inside of that network for connection between containers. And to do that, we also used container names as IP. That will not work on ECS service. But, when we are building the application on ECS, if we set the same task for the containers, we can guarantee those containers will have the same network on ECS. Moreover, we also need to change our IP's as `localhost`.
+First, "**find the ip by container name**" feature will not work. When we were building the application on our local, we created a network and build our containers inside of that network for connection between containers. And to do that, we also used container names as IP. That will not work on the ECS service. But, when we are building the application on ECS, if we set the same task for the containers, we can guarantee those containers will have the same network on ECS. Moreover, we also need to change our IPs as `localhost`.
 > TIP: You can always use environment variable as IP, so it will not matter if it will run on ECS or local. All you need to do is give the proper variable value.
 
-After configuring the application. Build image for each one separately and push on Docker Hup. And follow the steps below:
+After configuring the application. Build images for each one separately and push on Docker Hup. And follow the steps below:
 - Create cluster
 - Choose `Networking Only`, give a name and make sure VPC is created. You can use defaults for the rest. And then create
-- Select `Task Definitions` on ECS dashboard and create a new one with choosing `FARGATE`
-- Give a name, make sure you choose a `task role`. Choose `task size`
+- Select `Task Definitions` on the ECS dashboard and create a new one by choosing `FARGATE`
+- Give a name, and make sure you choose a `task role`. Choose `task size`
 - Then, click on `add container` and give a name
 - Give your image as we mentioned before
 - Make sure you map ports
 - Under `Environment`, make sure you over-write `nodemon start` command with adding `node,app.js` to `Commands`, because it will not work with ECS service
-- Also add the `environment variables` if you have, which we mentioned we will be using IP's as env. variables. The idea is, we will be using `.env` file to define variables. But since we do not use our run command manually on ECS, we will define them on here. Then, you can skip rest and use defaults
+- Also add the `environment variables` if you have them, which we mentioned we will be using IPs as env. variables. The idea is, that we will be using `.env` file to define variables. But since we do not use our run command manually on ECS, we will define them here. Then, you can skip the rest and use the defaults
 - After you are done with tasks, click on create service
-- Choose `FARGATE` as launch type, choose you `task definition` and give a name, choose number `1` as `number of tasks`
+- Choose `FARGATE` as launch type, choose your `task definition` and give a name, and choose number `1` as `number of tasks`
 - Continue to `configure network`, choose VPC, and under `subnets`, choose your subnets which you should be able to choose
 - Make sure `auto-assign public IP` is enabled
-- And under `load balancing`, choose `application load balancer`. If it tells you there is no balancer, click on create, choose HTTP/HTTPS, give any name, it should be `internet-facing`, it shoud also expose port **80**, and it should connect to same VPC, you can also check boxes for `availability zones`, and continue
-- At `configure security group`, select existing security
+- And under `load balancing`, choose `application load balancer`. If it tells you there is no balancer, click on create, choose HTTP/HTTPS, give any name, it should be `internet-facing`, it should also expose port **80**, and it should connect to the same VPC, you can also check boxes for `availability zones`, and continue
+- To `configure security group`, select the existing security
 - Under `configure routing`, name it, choose `IP` as target type and click on register target, use defaults and continue creating
 - Choose your load balancer you just created
-- Choose target group name and use defaults until you create the service
+- Choose the target group name and use defaults until you create the service
 
 > The `public IP address` ECS assign changes, and that is not. To change that go to `Load Balancers > Group details > Edit` and give a proper endpoint under healh check path to ensure ECS service can check and approves. Also, in security groups, add your security group with the default one. This will also allow us to connect through `DNS name`.
 
@@ -1483,10 +1483,10 @@ To update the container:
 - Click `Update Service`
 
 ## Using Mongo DB Atlas
-We already builded our application with a mongodb but we can also use Mongo DB Atlas which is cloud database. Just make sure you use the same version on both your application connection and in the Mongo DB Atlas Cluster version. And make sure you give permission for your local or from anywhere and also define users. And that is actually it. Mongo DB Atlas will take care of everything else.
+We already built our application with MongoDB but we can also use Mongo DB Atlas which is a cloud database. Just make sure you use the same version on both your application connection and in the Mongo DB Atlas Cluster version. And make sure you give permission for your local or from anywhere and also define users. And that is it. Mongo DB Atlas will take care of everything else.
 
 # Multi-Stage Builds
-So we already have couple of docker files. If we need to give specific builds for particular applications, such as for `React JS`, we might need to use multi-stage builds. To separate stages, we simply add another `FROM` layer and continue adding layers based on that stage on our dockerfile. 
+So we already have a couple of docker files. If we need to give specific builds for particular applications, such as for `React JS`, we might need to use multi-stage builds. To separate stages, we simply add another `FROM` layer and continue adding layers based on that stage on our dockerfile. 
 
 Example:
 ```
@@ -1511,18 +1511,18 @@ EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-As shown above, we separated our second stage with a `FROM nginx:stable-alpine` layer. That means that the build will change it's building stage based on that layer. We can also name stages as shown on the first layer which is `FROM node:14-alpine as build`. 
+As shown above, we separated our second stage with a `FROM nginx:stable-alpine` layer. That means that the build will change its building stage based on that layer. We can also name stages as shown on the first layer which is `FROM node:14-alpine as build`. 
 
-We can also let docker build specific stage with a `--target` command, like this:
+We can also let docker build a specific stage with a `--target` command, like this:
 ```
 docker build --target build -f frontend/Dockerfile.prod ./frontend
 ```
 > `-f` tag is for specifying the docker file.
 
-Couple of notes:
+A couple of notes:
 - **Bind Mounts should not** be used in production!
 - Containerized applications **might need a build step** (e.g. React apps)
-- **Multi-Container projects** might need to be **split** (or should be split) across mutiple hosts / remote machines
+- **Multi-Container projects** might need to be **split** (or should be split) across multiple hosts / remote machines
 - **Trade-offs** between **control** and **responsibility** might be worth it! (e.g. AWS RDS, MongoDB Atlas)
 
 
